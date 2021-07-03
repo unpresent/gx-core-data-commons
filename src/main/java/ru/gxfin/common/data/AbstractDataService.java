@@ -35,9 +35,10 @@ public abstract class AbstractDataService<O extends AbstractDataObject, P extend
     }
 
     @Override
-    public void addJsonPackage(String jsonPackage) throws JsonProcessingException {
+    public DataPackage<O> addJsonPackage(String jsonPackage) throws JsonProcessingException {
         final var dataPackage = this.objectMapper.readValue(jsonPackage, getPackageClass());
         addPackage(dataPackage);
+        return dataPackage;
     }
 
     @Override

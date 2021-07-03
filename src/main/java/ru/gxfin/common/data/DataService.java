@@ -24,7 +24,7 @@ public interface DataService<O extends DataObject> {
      * Добавление пакета объектов.
      * @param jsonPackage добавляемый пакет (в виде Json) объектов в Хранилище.
      */
-    void addJsonPackage(String jsonPackage) throws JsonProcessingException;
+    DataPackage<O> addJsonPackage(String jsonPackage) throws JsonProcessingException;
 
     /**
      * Обновление объекта в хранилище.
