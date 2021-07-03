@@ -1,38 +1,40 @@
 package ru.gxfin.common.data;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 /**
- * Интерфейс сереевис-хранилища объектов.
+ * Интерфейс серевиса-хранилища объектов.
  */
-public interface DataService<T extends DataObject, ID> {
+public interface DataService<O extends DataObject> {
 
     /**
      * Добавление одного объекта.
      * @param dataObject добавляемый объект в Хранилище.
      */
-    void add(T dataObject);
+    void add(O dataObject);
 
     /**
      * Добавление пакета объектов.
      * @param dataPackage добавляемый пакет объектов в Хранилище.
      */
-    void addAll(DataPackage<T> dataPackage);
+    void addPackage(DataPackage<O> dataPackage);
+
 
     /**
-     * Поиск объекта.
-     * @param id идентификатор объекта.
-     * @return объект.
+     * Добавление пакета объектов.
+     * @param jsonPackage добавляемый пакет (в виде Json) объектов в Хранилище.
      */
-    T getById(ID id);
+    void addJsonPackage(String jsonPackage) throws JsonProcessingException;
 
     /**
      * Обновление объекта в хранилище.
      * @param dataObject обновляемый объект.
      */
-    void update(T dataObject);
+    void update(O dataObject);
 
     /**
      * Удаление объекта из хранилища.
      * @param dataObject удаляемый объект.
      */
-    void delete(T dataObject);
+    void delete(O dataObject);
 }
