@@ -1,5 +1,7 @@
 package ru.gxfin.common.data;
 
+import org.jetbrains.annotations.NotNull;
+
 @SuppressWarnings("unused")
 public interface EntityFromDtoConverter<DEST extends EntityObject, DESTPACK extends EntitiesPackage<DEST>, DTO extends DataObject> {
     /**
@@ -7,12 +9,12 @@ public interface EntityFromDtoConverter<DEST extends EntityObject, DESTPACK exte
      * @param destination   EntityObject.
      * @param source        DTO (DataObject).
      */
-    void fillEntityFromDto(DEST destination, DTO source);
+    void fillEntityFromDto(@NotNull DEST destination, @NotNull DTO source);
 
     /**
      * Наполнение пакета EntityObjects из пакета DTOs.
      * @param destination   Пакет EntityObjects.
      * @param source        Пакет DTOs.
      */
-    void fillEntitiesPackageFromDtoPackage(DESTPACK destination, Iterable<DTO> source);
+    void fillEntitiesPackageFromDtoPackage(@NotNull DESTPACK destination, Iterable<DTO> source);
 }
