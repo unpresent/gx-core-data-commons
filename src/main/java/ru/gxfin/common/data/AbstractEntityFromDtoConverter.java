@@ -6,10 +6,10 @@ import org.jetbrains.annotations.NotNull;
 public abstract class AbstractEntityFromDtoConverter<DEST extends EntityObject, DESTPACK extends EntitiesPackage<DEST>, SOURCE extends DataObject>
         implements EntityFromDtoConverter<DEST, DESTPACK, SOURCE> {
     @Override
-    public abstract void fillEntityFromDto(@NotNull DEST destination, @NotNull SOURCE source);
+    public abstract void fillEntityFromDto(@NotNull DEST destination, @NotNull SOURCE source) throws InvalidDataObjectTypeException;
 
     @Override
-    public void fillEntitiesPackageFromDtoPackage(@NotNull DESTPACK destination, Iterable<SOURCE> source) {
+    public void fillEntitiesPackageFromDtoPackage(@NotNull DESTPACK destination, Iterable<SOURCE> source) throws InvalidDataObjectTypeException {
         if (source == null) {
             return;
         }
@@ -21,5 +21,5 @@ public abstract class AbstractEntityFromDtoConverter<DEST extends EntityObject, 
         }
     }
 
-    protected abstract DEST getOrCreateEntityByDto(SOURCE source);
+    protected abstract DEST getOrCreateEntityByDto(SOURCE source) throws InvalidDataObjectTypeException;
 }

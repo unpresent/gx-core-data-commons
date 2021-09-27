@@ -9,12 +9,12 @@ public interface EntityFromDtoConverter<DEST extends EntityObject, DESTPACK exte
      * @param destination   EntityObject.
      * @param source        DTO (DataObject).
      */
-    void fillEntityFromDto(@NotNull DEST destination, @NotNull DTO source);
+    void fillEntityFromDto(@NotNull DEST destination, @NotNull DTO source) throws InvalidDataObjectTypeException;
 
     /**
      * Наполнение пакета EntityObjects из пакета DTOs.
      * @param destination   Пакет EntityObjects.
      * @param source        Пакет DTOs.
      */
-    void fillEntitiesPackageFromDtoPackage(@NotNull DESTPACK destination, Iterable<DTO> source);
+    void fillEntitiesPackageFromDtoPackage(@NotNull DESTPACK destination, Iterable<DTO> source) throws InvalidDataObjectTypeException;
 }
