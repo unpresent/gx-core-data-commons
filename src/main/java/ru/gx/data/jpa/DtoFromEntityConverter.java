@@ -1,6 +1,9 @@
-package ru.gxfin.common.data;
+package ru.gx.data.jpa;
 
 import org.jetbrains.annotations.NotNull;
+import ru.gx.data.DataObject;
+import ru.gx.data.DataPackage;
+import ru.gx.data.InvalidDataObjectTypeException;
 
 @SuppressWarnings("unused")
 public interface DtoFromEntityConverter<DEST extends DataObject, DESTPACK extends DataPackage<DEST>, SOURCE extends EntityObject> {
@@ -9,12 +12,12 @@ public interface DtoFromEntityConverter<DEST extends DataObject, DESTPACK extend
      * @param destination   DTO (DataObject).
      * @param source        EntityObject.
      */
-    void fillDtoFromEntity(@NotNull DEST destination, @NotNull SOURCE source) throws InvalidDataObjectTypeException;
+    void fillDtoFromEntity(@NotNull final DEST destination, @NotNull final SOURCE source) throws InvalidDataObjectTypeException;
 
     /**
      * Наполнение пакета DTOs из пакета EntityObjects.
      * @param destination   Пакет DTOs.
      * @param source        Пакет EntityObjects.
      */
-    void fillDtoPackageFromEntitiesPackage(@NotNull DESTPACK destination, Iterable<SOURCE> source) throws InvalidDataObjectTypeException;
+    void fillDtoPackageFromEntitiesPackage(@NotNull final DESTPACK destination, @NotNull final Iterable<SOURCE> source) throws InvalidDataObjectTypeException;
 }

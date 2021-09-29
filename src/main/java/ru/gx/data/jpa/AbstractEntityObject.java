@@ -1,4 +1,4 @@
-package ru.gxfin.common.data;
+package ru.gx.data.jpa;
 
 @SuppressWarnings("unused")
 public abstract class AbstractEntityObject implements EntityObject {

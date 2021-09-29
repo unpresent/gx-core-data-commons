@@ -1,4 +1,4 @@
-package ru.gxfin.common.data;
+package ru.gx.data.jpa;
 
 import java.io.Serializable;
 

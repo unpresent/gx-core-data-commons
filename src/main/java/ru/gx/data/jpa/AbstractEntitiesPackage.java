@@ -1,7 +1,9 @@
-package ru.gxfin.common.data;
+package ru.gx.data.jpa;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,11 +14,13 @@ public class AbstractEntitiesPackage<E extends AbstractEntityObject> implements 
     private final List<E> listObjects = new ArrayList<>();
 
     @Override
+    @NotNull
     public Collection<E> getObjects() {
         return this.listObjects;
     }
 
     @Override
+    @Nullable
     public E get(int index) {
         return getListObjects().get(index);
     }

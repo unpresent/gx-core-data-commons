@@ -1,18 +1,17 @@
-package ru.gxfin.common.data;
+package ru.gx.data.jpa;
 
 import org.jetbrains.annotations.NotNull;
+import ru.gx.data.DataObject;
+import ru.gx.data.InvalidDataObjectTypeException;
 
 @SuppressWarnings("unused")
 public abstract class AbstractEntityFromDtoConverter<DEST extends EntityObject, DESTPACK extends EntitiesPackage<DEST>, SOURCE extends DataObject>
         implements EntityFromDtoConverter<DEST, DESTPACK, SOURCE> {
     @Override
-    public abstract void fillEntityFromDto(@NotNull DEST destination, @NotNull SOURCE source) throws InvalidDataObjectTypeException;
+    public abstract void fillEntityFromDto(@NotNull final DEST destination, @NotNull final SOURCE source) throws InvalidDataObjectTypeException;
 
     @Override
-    public void fillEntitiesPackageFromDtoPackage(@NotNull DESTPACK destination, Iterable<SOURCE> source) throws InvalidDataObjectTypeException {
-        if (source == null) {
-            return;
-        }
+    public void fillEntitiesPackageFromDtoPackage(@NotNull final DESTPACK destination, @NotNull final Iterable<SOURCE> source) throws InvalidDataObjectTypeException {
         final var destObjects = destination.getObjects();
         for (var dto : source) {
             final var entity = getOrCreateEntityByDto(dto);
@@ -21,5 +20,6 @@ public abstract class AbstractEntityFromDtoConverter<DEST extends EntityObject, 
         }
     }
 
-    protected abstract DEST getOrCreateEntityByDto(SOURCE source) throws InvalidDataObjectTypeException;
+    @NotNull
+    protected abstract DEST getOrCreateEntityByDto(@NotNull final SOURCE source) throws InvalidDataObjectTypeException;
 }
