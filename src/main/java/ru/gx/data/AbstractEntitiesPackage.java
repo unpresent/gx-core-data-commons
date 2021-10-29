@@ -1,4 +1,4 @@
-package ru.gx.data.jpa;
+package ru.gx.data;
 
 import lombok.AccessLevel;
 import lombok.Getter;

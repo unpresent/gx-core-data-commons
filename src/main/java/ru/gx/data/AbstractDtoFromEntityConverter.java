@@ -1,9 +1,6 @@
-package ru.gx.data.jpa;
+package ru.gx.data;
 
 import org.jetbrains.annotations.NotNull;
-import ru.gx.data.DataObject;
-import ru.gx.data.DataPackage;
-import ru.gx.data.InvalidDataObjectTypeException;
 
 @SuppressWarnings("unused")
 public abstract class AbstractDtoFromEntityConverter<DEST extends DataObject, DESTPACK extends DataPackage<DEST>, SOURCE extends EntityObject>
