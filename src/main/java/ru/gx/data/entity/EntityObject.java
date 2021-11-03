@@ -1,4 +1,4 @@
-package ru.gx.data;
+package ru.gx.data.entity;
 
 import java.io.Serializable;
 

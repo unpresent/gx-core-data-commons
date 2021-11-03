@@ -1,4 +1,4 @@
-package ru.gx.data;
+package ru.gx.data.entity;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

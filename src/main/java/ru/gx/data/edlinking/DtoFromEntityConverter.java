@@ -1,6 +1,10 @@
-package ru.gx.data;
+package ru.gx.data.edlinking;
 
 import org.jetbrains.annotations.NotNull;
+import ru.gx.data.DataObject;
+import ru.gx.data.DataPackage;
+import ru.gx.data.InvalidDataObjectTypeException;
+import ru.gx.data.entity.EntityObject;
 
 @SuppressWarnings("unused")
 public interface DtoFromEntityConverter<DEST extends DataObject, DESTPACK extends DataPackage<DEST>, SOURCE extends EntityObject> {
@@ -16,5 +20,6 @@ public interface DtoFromEntityConverter<DEST extends DataObject, DESTPACK extend
      * @param destination   Пакет DTOs.
      * @param source        Пакет EntityObjects.
      */
-    void fillDtoPackageFromEntitiesPackage(@NotNull final DESTPACK destination, @NotNull final Iterable<SOURCE> source) throws InvalidDataObjectTypeException;
+    @SuppressWarnings("rawtypes")
+    void fillDtoPackageFromEntitiesPackage(@NotNull final DataPackage destination, @NotNull final Iterable<SOURCE> source) throws InvalidDataObjectTypeException;
 }

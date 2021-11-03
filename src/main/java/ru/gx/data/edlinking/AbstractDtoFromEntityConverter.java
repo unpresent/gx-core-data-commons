@@ -1,6 +1,10 @@
-package ru.gx.data;
+package ru.gx.data.edlinking;
 
 import org.jetbrains.annotations.NotNull;
+import ru.gx.data.DataObject;
+import ru.gx.data.DataPackage;
+import ru.gx.data.InvalidDataObjectTypeException;
+import ru.gx.data.entity.EntityObject;
 
 @SuppressWarnings("unused")
 public abstract class AbstractDtoFromEntityConverter<DEST extends DataObject, DESTPACK extends DataPackage<DEST>, SOURCE extends EntityObject>
@@ -8,8 +12,9 @@ public abstract class AbstractDtoFromEntityConverter<DEST extends DataObject, DE
     @Override
     public abstract void fillDtoFromEntity(@NotNull final DEST destination, @NotNull final SOURCE source) throws InvalidDataObjectTypeException;
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public void fillDtoPackageFromEntitiesPackage(@NotNull final DESTPACK destination, @NotNull final Iterable<SOURCE> source) throws InvalidDataObjectTypeException {
+    public void fillDtoPackageFromEntitiesPackage(@NotNull final DataPackage destination, @NotNull final Iterable<SOURCE> source) throws InvalidDataObjectTypeException {
         final var destObjects = destination.getObjects();
         for (var entity : source) {
             final var dto = getOrCreateDtoByEntity(entity);

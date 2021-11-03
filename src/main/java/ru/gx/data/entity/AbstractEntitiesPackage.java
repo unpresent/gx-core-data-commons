@@ -1,9 +1,11 @@
-package ru.gx.data;
+package ru.gx.data.entity;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.gx.data.entity.AbstractEntityObject;
+import ru.gx.data.entity.EntitiesPackage;
 
 import java.util.ArrayList;
 import java.util.Collection;
