@@ -1,6 +1,7 @@
 package ru.gx.data.edlinking;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.gx.data.DataObject;
 import ru.gx.data.InvalidDataObjectTypeException;
 import ru.gx.data.NotAllowedObjectUpdateException;
@@ -18,13 +19,15 @@ public abstract class AbstractEntityFromDtoConverter<DEST extends EntityObject, 
      * @param source        Объект (DataObject), из которого берем данные.
      */
     @Override
-    public abstract DEST findDtoBySource(@NotNull SOURCE source);
+    @Nullable
+    public abstract DEST findDtoBySource(@Nullable SOURCE source);
 
     /**
      * Создание объекта по источнику (DataObject).
      * @param source        Объект (DataObject), из которого берем данные.
      */
     @Override
+    @NotNull
     public abstract DEST createDtoBySource(@NotNull SOURCE source);
 
     /**

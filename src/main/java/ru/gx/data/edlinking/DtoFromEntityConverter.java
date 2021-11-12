@@ -1,6 +1,7 @@
 package ru.gx.data.edlinking;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.gx.data.DataObject;
 import ru.gx.data.NotAllowedObjectUpdateException;
 import ru.gx.data.entity.EntityObject;
@@ -14,12 +15,14 @@ public interface DtoFromEntityConverter<DEST extends DataObject, SOURCE extends 
      * Поиск объекта одного типа по указанному источнику (EntityObject).
      * @param source        Объект (EntityObject), из которого берем данные.
      */
-    DEST findDtoBySource(@NotNull final SOURCE source);
+    @Nullable
+    DEST findDtoBySource(@Nullable final SOURCE source);
 
     /**
      * Создание объекта по источнику (EntityObject).
      * @param source        Объект (EntityObject), из которого берем данные.
      */
+    @NotNull
     DEST createDtoBySource(@NotNull final SOURCE source);
 
     /**
