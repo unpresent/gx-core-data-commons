@@ -3,6 +3,7 @@ package ru.gx.data.edlinking;
 import org.jetbrains.annotations.NotNull;
 import ru.gx.data.DataObject;
 import ru.gx.data.InvalidDataObjectTypeException;
+import ru.gx.data.NotAllowedObjectUpdateException;
 import ru.gx.data.entity.EntitiesPackage;
 import ru.gx.data.entity.EntityObject;
 
@@ -39,7 +40,7 @@ public abstract class AbstractEntityFromDtoConverter<DEST extends EntityObject, 
      * @param source        Объект, из которого берем данные.
      */
     @Override
-    public abstract void updateDtoBySource(@NotNull DEST destination, @NotNull SOURCE source);
+    public abstract void updateDtoBySource(@NotNull DEST destination, @NotNull SOURCE source) throws NotAllowedObjectUpdateException;
 
     /**
      * Наполнение списка результирующих объектов (EntityObject) из списка объектов-источников (DataObject).
@@ -47,7 +48,7 @@ public abstract class AbstractEntityFromDtoConverter<DEST extends EntityObject, 
      * @param source        Источник - список объектов-источников (DataObject).
      */
     @Override
-    public void fillDtoCollectionFromSource(@NotNull Collection<DEST> destination, @NotNull Iterable<SOURCE> source) {
+    public void fillDtoCollectionFromSource(@NotNull Collection<DEST> destination, @NotNull Iterable<SOURCE> source) throws NotAllowedObjectUpdateException {
         for (var sourceObject : source) {
             var destObject = findDtoBySource(sourceObject);
             if (destObject == null) {

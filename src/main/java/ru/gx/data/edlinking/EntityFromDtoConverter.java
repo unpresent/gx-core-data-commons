@@ -3,6 +3,7 @@ package ru.gx.data.edlinking;
 import org.jetbrains.annotations.NotNull;
 import ru.gx.data.DataObject;
 import ru.gx.data.InvalidDataObjectTypeException;
+import ru.gx.data.NotAllowedObjectUpdateException;
 import ru.gx.data.entity.EntitiesPackage;
 import ru.gx.data.entity.EntityObject;
 
@@ -34,12 +35,12 @@ public interface EntityFromDtoConverter<DEST extends EntityObject, SOURCE extend
      * @param destination   Объект, в который загружаем данные.
      * @param source        Объект, из которого берем данные.
      */
-    void updateDtoBySource(@NotNull final DEST destination, @NotNull final SOURCE source);
+    void updateDtoBySource(@NotNull final DEST destination, @NotNull final SOURCE source) throws NotAllowedObjectUpdateException;
 
     /**
      * Наполнение списка результирующих объектов (EntityObject) из списка объектов-источников (DataObject).
      * @param destination   Список результирующих объектов (EntityObject).
      * @param source        Источник - список объектов-источников (DataObject).
      */
-    void fillDtoCollectionFromSource(@NotNull final Collection<DEST> destination, @NotNull final Iterable<SOURCE> source);
+    void fillDtoCollectionFromSource(@NotNull final Collection<DEST> destination, @NotNull final Iterable<SOURCE> source) throws NotAllowedObjectUpdateException;
 }

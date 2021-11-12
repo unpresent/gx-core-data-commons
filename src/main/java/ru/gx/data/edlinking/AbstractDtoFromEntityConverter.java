@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import ru.gx.data.DataObject;
 import ru.gx.data.DataPackage;
 import ru.gx.data.InvalidDataObjectTypeException;
+import ru.gx.data.NotAllowedObjectUpdateException;
 import ru.gx.data.entity.EntityObject;
 
 import java.util.Collection;
@@ -42,7 +43,7 @@ public abstract class AbstractDtoFromEntityConverter<DEST extends DataObject, SO
      * @param source      Объект, из которого берем данные.
      */
     @Override
-    public abstract void updateDtoBySource(@NotNull DEST destination, @NotNull SOURCE source);
+    public abstract void updateDtoBySource(@NotNull DEST destination, @NotNull SOURCE source) throws NotAllowedObjectUpdateException;
 
     /**
      * Наполнение списка результирующих объектов (DataObject) из списка объектов-источников (EntityObject).
@@ -51,7 +52,7 @@ public abstract class AbstractDtoFromEntityConverter<DEST extends DataObject, SO
      * @param source      Источник - список объектов-источников (EntityObject).
      */
     @Override
-    public void fillDtoCollectionFromSource(@NotNull Collection<DEST> destination, @NotNull Iterable<SOURCE> source) {
+    public void fillDtoCollectionFromSource(@NotNull Collection<DEST> destination, @NotNull Iterable<SOURCE> source) throws NotAllowedObjectUpdateException {
         for (var sourceObject : source) {
             var destObject = findDtoBySource(sourceObject);
             if (destObject == null) {
