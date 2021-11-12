@@ -6,23 +6,60 @@ import ru.gx.data.DataPackage;
 import ru.gx.data.InvalidDataObjectTypeException;
 import ru.gx.data.entity.EntityObject;
 
-@SuppressWarnings("unused")
-public abstract class AbstractDtoFromEntityConverter<DEST extends DataObject, DESTPACK extends DataPackage<DEST>, SOURCE extends EntityObject>
-        implements DtoFromEntityConverter<DEST, DESTPACK, SOURCE> {
-    @Override
-    public abstract void fillDtoFromEntity(@NotNull final DEST destination, @NotNull final SOURCE source) throws InvalidDataObjectTypeException;
+import java.util.Collection;
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings("unused")
+public abstract class AbstractDtoFromEntityConverter<DEST extends DataObject, SOURCE extends EntityObject>
+        implements DtoFromEntityConverter<DEST, SOURCE> {
+
+    /**
+     * Поиск объекта одного типа по указанному источнику другого типа.
+     *
+     * @param source Объект (EntityObject), из которого берем данные.
+     */
     @Override
-    public void fillDtoPackageFromEntitiesPackage(@NotNull final DataPackage destination, @NotNull final Iterable<SOURCE> source) throws InvalidDataObjectTypeException {
-        final var destObjects = destination.getObjects();
-        for (var entity : source) {
-            final var dto = getOrCreateDtoByEntity(entity);
-            fillDtoFromEntity(dto, entity);
-            destObjects.add(dto);
+    public abstract DEST findDtoBySource(@NotNull SOURCE source);
+
+    /**
+     * Создание объекта по источнику.
+     *
+     * @param source Объект (EntityObject), из которого берем данные.
+     */
+    @Override
+    public abstract DEST createDtoBySource(@NotNull SOURCE source);
+
+    /**
+     * @param destination Объект-назначения данных.
+     * @return Допустимо ли изменение объекта-назначения.
+     */
+    @Override
+    public abstract boolean isDestinationUpdatable(@NotNull DEST destination);
+
+    /**
+     * Наполнение destination (DataObject) данными из source (EntityObject).
+     *
+     * @param destination Объект, в который загружаем данные.
+     * @param source      Объект, из которого берем данные.
+     */
+    @Override
+    public abstract void updateDtoBySource(@NotNull DEST destination, @NotNull SOURCE source);
+
+    /**
+     * Наполнение списка результирующих объектов (DataObject) из списка объектов-источников (EntityObject).
+     *
+     * @param destination Список результирующих объектов (DataObject).
+     * @param source      Источник - список объектов-источников (EntityObject).
+     */
+    @Override
+    public void fillDtoCollectionFromSource(@NotNull Collection<DEST> destination, @NotNull Iterable<SOURCE> source) {
+        for (var sourceObject : source) {
+            var destObject = findDtoBySource(sourceObject);
+            if (destObject == null) {
+                destObject = createDtoBySource(sourceObject);
+            } else if (isDestinationUpdatable(destObject)) {
+                updateDtoBySource(destObject, sourceObject);
+            }
+            destination.add(destObject);
         }
     }
-
-    @NotNull
-    protected abstract DEST getOrCreateDtoByEntity(@NotNull final SOURCE source) throws InvalidDataObjectTypeException;
 }

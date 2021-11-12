@@ -42,16 +42,16 @@ public interface EntityDtoLinkDescriptor<E extends EntityObject, EP extends Enti
     EntityDtoLinkDescriptor<E, EP, ID, O, P> setMemoryRepository(@NotNull final DataMemoryRepository<O, P> memoryRepository);
 
     @Nullable
-    EntityFromDtoConverter<E, EP, O> getEntityFromDtoConverter();
+    EntityFromDtoConverter<E, O> getEntityFromDtoConverter();
 
     @NotNull
-    EntityDtoLinkDescriptor<E, EP, ID, O, P> setEntityFromDtoConverter(@NotNull final EntityFromDtoConverter<E, EP, O> entityFromDtoConverter);
+    EntityDtoLinkDescriptor<E, EP, ID, O, P> setEntityFromDtoConverter(@NotNull final EntityFromDtoConverter<E, O> entityFromDtoConverter);
 
     @Nullable
-    DtoFromEntityConverter<O, P, E> getDtoFromEntityConverter();
+    DtoFromEntityConverter<O, E> getDtoFromEntityConverter();
 
     @NotNull
-    EntityDtoLinkDescriptor<E, EP, ID, O, P> setDtoFromEntityConverter(@NotNull final DtoFromEntityConverter<O, P, E> dtoFromEntityConverter);
+    EntityDtoLinkDescriptor<E, EP, ID, O, P> setDtoFromEntityConverter(@NotNull final DtoFromEntityConverter<O, E> dtoFromEntityConverter);
 
     @NotNull
     P createDtoPackage() throws EntitiesDtoLinksConfigurationException;
