@@ -1,4 +1,4 @@
-package ru.gx.data.config;
+package ru.gx.core.data.config;
 
 import lombok.Getter;
 import lombok.Setter;

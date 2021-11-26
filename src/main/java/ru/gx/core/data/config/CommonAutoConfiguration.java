@@ -1,4 +1,4 @@
-package ru.gx.data.config;
+package ru.gx.core.data.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -6,10 +6,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.gx.data.ActiveConnectionsContainer;
-import ru.gx.data.ActiveSessionsContainer;
-import ru.gx.data.edlinking.EntitiesDtoLinksConfiguratorCaller;
-import ru.gx.data.edlinking.SimpleEntitiesDtoLinksConfiguration;
+import ru.gx.core.data.ActiveConnectionsContainer;
+import ru.gx.core.data.ActiveSessionsContainer;
+import ru.gx.core.data.edlinking.EntitiesDtoLinksConfiguratorCaller;
+import ru.gx.core.data.edlinking.SimpleEntitiesDtoLinksConfiguration;
 
 @Configuration
 @EnableConfigurationProperties(ConfigurationPropertiesService.class)

@@ -1,15 +1,15 @@
-package ru.gx.data.edlinking;
+package ru.gx.core.data.edlinking;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ru.gx.data.DataObject;
-import ru.gx.data.NotAllowedObjectUpdateException;
-import ru.gx.data.entity.EntityObject;
+import ru.gx.core.data.DataObject;
+import ru.gx.core.data.NotAllowedObjectUpdateException;
+import ru.gx.core.data.entity.EntityObject;
 
 import java.util.Collection;
 
 @SuppressWarnings("unused")
-public interface DtoFromEntityConverter<DEST extends DataObject, SOURCE extends EntityObject> {
+public interface DtoFromEntityConvertor<DEST extends DataObject, SOURCE extends EntityObject> {
 
     /**
      * Поиск объекта одного типа по указанному источнику (EntityObject).

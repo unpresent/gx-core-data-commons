@@ -1,4 +1,4 @@
-package ru.gx.data.edlinking;
+package ru.gx.core.data.edlinking;
 
 import lombok.Getter;
 import lombok.Setter;

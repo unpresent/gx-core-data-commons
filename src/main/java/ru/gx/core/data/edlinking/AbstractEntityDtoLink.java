@@ -1,15 +1,15 @@
-package ru.gx.data.edlinking;
+package ru.gx.core.data.edlinking;
 
 import lombok.*;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.data.repository.CrudRepository;
-import ru.gx.data.DataMemoryRepository;
-import ru.gx.data.DataObject;
-import ru.gx.data.DataPackage;
-import ru.gx.data.entity.EntitiesPackage;
-import ru.gx.data.entity.EntityObject;
+import ru.gx.core.data.DataMemoryRepository;
+import ru.gx.core.data.DataObject;
+import ru.gx.core.data.DataPackage;
+import ru.gx.core.data.entity.EntitiesPackage;
+import ru.gx.core.data.entity.EntityObject;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -44,11 +44,11 @@ public abstract class AbstractEntityDtoLink<E extends EntityObject, EP extends E
 
     @Setter
     @Nullable
-    private EntityFromDtoConverter<E, O> entityFromDtoConverter;
+    private EntityFromDtoConvertor<E, O> entityFromDtoConverter;
 
     @Setter
     @Nullable
-    private DtoFromEntityConverter<O, E> dtoFromEntityConverter;
+    private DtoFromEntityConvertor<O, E> dtoFromEntityConverter;
 
     protected AbstractEntityDtoLink(@NotNull Class<E> entityClass, @NotNull Class<O> dtoClass) {
         this.entityClass = entityClass;

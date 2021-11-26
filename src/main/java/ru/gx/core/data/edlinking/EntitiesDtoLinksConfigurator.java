@@ -1,4 +1,4 @@
-package ru.gx.data.edlinking;
+package ru.gx.core.data.edlinking;
 
 import org.jetbrains.annotations.NotNull;
 

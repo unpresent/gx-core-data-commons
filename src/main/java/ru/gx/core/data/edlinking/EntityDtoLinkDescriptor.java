@@ -1,13 +1,13 @@
-package ru.gx.data.edlinking;
+package ru.gx.core.data.edlinking;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.data.repository.CrudRepository;
-import ru.gx.data.DataMemoryRepository;
-import ru.gx.data.DataObject;
-import ru.gx.data.DataPackage;
-import ru.gx.data.entity.EntitiesPackage;
-import ru.gx.data.entity.EntityObject;
+import ru.gx.core.data.DataMemoryRepository;
+import ru.gx.core.data.DataObject;
+import ru.gx.core.data.DataPackage;
+import ru.gx.core.data.entity.EntitiesPackage;
+import ru.gx.core.data.entity.EntityObject;
 
 @SuppressWarnings("unused")
 public interface EntityDtoLinkDescriptor<E extends EntityObject, EP extends EntitiesPackage<E>, ID, O extends DataObject, P extends DataPackage<O>> {
@@ -42,16 +42,16 @@ public interface EntityDtoLinkDescriptor<E extends EntityObject, EP extends Enti
     EntityDtoLinkDescriptor<E, EP, ID, O, P> setMemoryRepository(@NotNull final DataMemoryRepository<O, P> memoryRepository);
 
     @Nullable
-    EntityFromDtoConverter<E, O> getEntityFromDtoConverter();
+    EntityFromDtoConvertor<E, O> getEntityFromDtoConverter();
 
     @NotNull
-    EntityDtoLinkDescriptor<E, EP, ID, O, P> setEntityFromDtoConverter(@NotNull final EntityFromDtoConverter<E, O> entityFromDtoConverter);
+    EntityDtoLinkDescriptor<E, EP, ID, O, P> setEntityFromDtoConverter(@NotNull final EntityFromDtoConvertor<E, O> entityFromDtoConverter);
 
     @Nullable
-    DtoFromEntityConverter<O, E> getDtoFromEntityConverter();
+    DtoFromEntityConvertor<O, E> getDtoFromEntityConverter();
 
     @NotNull
-    EntityDtoLinkDescriptor<E, EP, ID, O, P> setDtoFromEntityConverter(@NotNull final DtoFromEntityConverter<O, E> dtoFromEntityConverter);
+    EntityDtoLinkDescriptor<E, EP, ID, O, P> setDtoFromEntityConverter(@NotNull final DtoFromEntityConvertor<O, E> dtoFromEntityConverter);
 
     @NotNull
     P createDtoPackage() throws EntitiesDtoLinksConfigurationException;

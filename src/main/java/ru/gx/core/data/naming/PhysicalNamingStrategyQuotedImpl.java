@@ -1,4 +1,4 @@
-package ru.gx.data.naming;
+package ru.gx.core.data.naming;
 
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;

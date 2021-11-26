@@ -1,4 +1,4 @@
-package ru.gx.data;
+package ru.gx.core.data;
 
 import org.hibernate.Session;
 import org.jetbrains.annotations.NotNull;

@@ -1,18 +1,16 @@
-package ru.gx.data.edlinking;
+package ru.gx.core.data.edlinking;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ru.gx.data.DataObject;
-import ru.gx.data.DataPackage;
-import ru.gx.data.InvalidDataObjectTypeException;
-import ru.gx.data.NotAllowedObjectUpdateException;
-import ru.gx.data.entity.EntityObject;
+import ru.gx.core.data.DataObject;
+import ru.gx.core.data.NotAllowedObjectUpdateException;
+import ru.gx.core.data.entity.EntityObject;
 
 import java.util.Collection;
 
 @SuppressWarnings("unused")
-public abstract class AbstractDtoFromEntityConverter<DEST extends DataObject, SOURCE extends EntityObject>
-        implements DtoFromEntityConverter<DEST, SOURCE> {
+public abstract class AbstractDtoFromEntityConvertor<DEST extends DataObject, SOURCE extends EntityObject>
+        implements DtoFromEntityConvertor<DEST, SOURCE> {
 
     /**
      * Поиск объекта одного типа по указанному источнику другого типа.

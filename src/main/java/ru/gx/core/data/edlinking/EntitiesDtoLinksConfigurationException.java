@@ -1,4 +1,4 @@
-package ru.gx.data.edlinking;
+package ru.gx.core.data.edlinking;
 
 public class EntitiesDtoLinksConfigurationException extends Exception {
     public EntitiesDtoLinksConfigurationException() {

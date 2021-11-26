@@ -1,6 +1,4 @@
-package ru.gx.data.entity;
-
-import ru.gx.data.entity.EntityObject;
+package ru.gx.core.data.entity;
 
 @SuppressWarnings("unused")
 public abstract class AbstractEntityObject implements EntityObject {
