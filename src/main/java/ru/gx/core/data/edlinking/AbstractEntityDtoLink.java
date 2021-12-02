@@ -44,11 +44,11 @@ public abstract class AbstractEntityDtoLink<E extends EntityObject, EP extends E
 
     @Setter
     @Nullable
-    private EntityFromDtoConvertor<E, O> entityFromDtoConverter;
+    private EntityFromDtoConverter<E, O> entityFromDtoConverter;
 
     @Setter
     @Nullable
-    private DtoFromEntityConvertor<O, E> dtoFromEntityConverter;
+    private DtoFromEntityConverter<O, E> dtoFromEntityConverter;
 
     protected AbstractEntityDtoLink(@NotNull Class<E> entityClass, @NotNull Class<O> dtoClass) {
         this.entityClass = entityClass;

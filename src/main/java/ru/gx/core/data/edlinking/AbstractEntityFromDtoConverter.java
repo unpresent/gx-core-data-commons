@@ -9,22 +9,20 @@ import ru.gx.core.data.entity.EntityObject;
 import java.util.Collection;
 
 @SuppressWarnings("unused")
-public abstract class AbstractDtoFromEntityConvertor<DEST extends DataObject, SOURCE extends EntityObject>
-        implements DtoFromEntityConvertor<DEST, SOURCE> {
+public abstract class AbstractEntityFromDtoConverter<DEST extends EntityObject, SOURCE extends DataObject>
+        implements EntityFromDtoConverter<DEST, SOURCE> {
 
     /**
-     * Поиск объекта одного типа по указанному источнику другого типа.
-     *
-     * @param source Объект (EntityObject), из которого берем данные.
+     * Поиск объекта одного типа по указанному источнику (DataObject).
+     * @param source        Объект (DataObject), из которого берем данные.
      */
     @Override
     @Nullable
     public abstract DEST findDtoBySource(@Nullable SOURCE source);
 
     /**
-     * Создание объекта по источнику.
-     *
-     * @param source Объект (EntityObject), из которого берем данные.
+     * Создание объекта по источнику (DataObject).
+     * @param source        Объект (DataObject), из которого берем данные.
      */
     @Override
     @NotNull
@@ -38,19 +36,17 @@ public abstract class AbstractDtoFromEntityConvertor<DEST extends DataObject, SO
     public abstract boolean isDestinationUpdatable(@NotNull DEST destination);
 
     /**
-     * Наполнение destination (DataObject) данными из source (EntityObject).
-     *
-     * @param destination Объект, в который загружаем данные.
-     * @param source      Объект, из которого берем данные.
+     * Наполнение destination (EntityObject) данными из source (DataObject).
+     * @param destination   Объект, в который загружаем данные.
+     * @param source        Объект, из которого берем данные.
      */
     @Override
     public abstract void updateDtoBySource(@NotNull DEST destination, @NotNull SOURCE source) throws NotAllowedObjectUpdateException;
 
     /**
-     * Наполнение списка результирующих объектов (DataObject) из списка объектов-источников (EntityObject).
-     *
-     * @param destination Список результирующих объектов (DataObject).
-     * @param source      Источник - список объектов-источников (EntityObject).
+     * Наполнение списка результирующих объектов (EntityObject) из списка объектов-источников (DataObject).
+     * @param destination   Список результирующих объектов (EntityObject).
+     * @param source        Источник - список объектов-источников (DataObject).
      */
     @Override
     public void fillDtoCollectionFromSource(@NotNull Collection<DEST> destination, @NotNull Iterable<SOURCE> source) throws NotAllowedObjectUpdateException {
