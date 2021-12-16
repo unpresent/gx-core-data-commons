@@ -17,6 +17,7 @@ import static lombok.AccessLevel.PROTECTED;
  * Задача данного Bean-а вызвать настройщиков конфигураций обработки входящих потоков.
  */
 @Slf4j
+@Deprecated
 public class EntitiesDtoLinksConfiguratorCaller {
     @Getter(PROTECTED)
     @Setter(value = PROTECTED, onMethod_ = @Autowired)

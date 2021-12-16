@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
  * Задача реализатора данного интерфейса заключается в определении связок Entity и Dto.
  */
 @SuppressWarnings("unused")
+@Deprecated
 public interface EntitiesDtoLinksConfigurator {
     /**
      * Вызывается после настройки бинов (по событию ApplicationReadyEvent).

@@ -31,17 +31,17 @@ public class CommonAutoConfiguration {
         return new ActiveSessionsContainer();
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnProperty(value = "service.entities-dto-links.simple-configuration.enabled", havingValue = "true")
-    public SimpleEntitiesDtoLinksConfiguration simpleEntitiesDtoLinksConfiguration() {
-        return new SimpleEntitiesDtoLinksConfiguration();
-    }
+    //    @Bean
+    //    @ConditionalOnMissingBean
+    //    @ConditionalOnProperty(value = "service.entities-dto-links.simple-configuration.enabled", havingValue = "true")
+    //    public SimpleEntitiesDtoLinksConfiguration simpleEntitiesDtoLinksConfiguration() {
+    //        return new SimpleEntitiesDtoLinksConfiguration();
+    //    }
 
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnProperty(value = "service.entities-dto-links.configurator-caller.enabled", havingValue = "true")
-    public EntitiesDtoLinksConfiguratorCaller configuratorCaller() {
-        return new EntitiesDtoLinksConfiguratorCaller();
-    }
+    //    @Bean
+    //    @ConditionalOnMissingBean
+    //    @ConditionalOnProperty(value = "service.entities-dto-links.configurator-caller.enabled", havingValue = "true")
+    //    public EntitiesDtoLinksConfiguratorCaller configuratorCaller() {
+    //        return new EntitiesDtoLinksConfiguratorCaller();
+    //    }
 }
