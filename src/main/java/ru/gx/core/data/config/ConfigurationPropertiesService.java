@@ -16,9 +16,6 @@ public class ConfigurationPropertiesService {
     @NestedConfigurationProperty
     private ActiveSessionsContainer activeConnectionsContainer;
 
-    //    @NestedConfigurationProperty
-    //    private EntitiesDtoLinks entitiesDtoLinks;
-
     @Getter
     @Setter
     public static class ActiveSessionsContainer {
@@ -30,26 +27,4 @@ public class ConfigurationPropertiesService {
     public static class ActiveConnectionsContainer {
         private boolean enabled;
     }
-
-    //    @Getter
-    //    @Setter
-    //    public static class EntitiesDtoLinks {
-    //        @NestedConfigurationProperty
-    //        private SimpleConfiguration simpleConfiguration;
-    //
-    //        @NestedConfigurationProperty
-    //        private ConfiguratorCaller configuratorCaller;
-    //    }
-
-    //    @Getter
-    //    @Setter
-    //    public static class SimpleConfiguration {
-    //        private boolean enabled;
-    //    }
-    //
-    //    @Getter
-    //    @Setter
-    //    public static class ConfiguratorCaller {
-    //        private boolean enabled;
-    //    }
 }

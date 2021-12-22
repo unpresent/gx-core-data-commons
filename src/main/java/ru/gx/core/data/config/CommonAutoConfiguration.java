@@ -8,8 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.gx.core.data.ActiveConnectionsContainer;
 import ru.gx.core.data.ActiveSessionsContainer;
-import ru.gx.core.data.edlinking.EntitiesDtoLinksConfiguratorCaller;
-import ru.gx.core.data.edlinking.SimpleEntitiesDtoLinksConfiguration;
 
 @Configuration
 @EnableConfigurationProperties(ConfigurationPropertiesService.class)
@@ -30,18 +28,4 @@ public class CommonAutoConfiguration {
     public ActiveSessionsContainer activeSessionsContainer() {
         return new ActiveSessionsContainer();
     }
-
-    //    @Bean
-    //    @ConditionalOnMissingBean
-    //    @ConditionalOnProperty(value = "service.entities-dto-links.simple-configuration.enabled", havingValue = "true")
-    //    public SimpleEntitiesDtoLinksConfiguration simpleEntitiesDtoLinksConfiguration() {
-    //        return new SimpleEntitiesDtoLinksConfiguration();
-    //    }
-
-    //    @Bean
-    //    @ConditionalOnMissingBean
-    //    @ConditionalOnProperty(value = "service.entities-dto-links.configurator-caller.enabled", havingValue = "true")
-    //    public EntitiesDtoLinksConfiguratorCaller configuratorCaller() {
-    //        return new EntitiesDtoLinksConfiguratorCaller();
-    //    }
 }
