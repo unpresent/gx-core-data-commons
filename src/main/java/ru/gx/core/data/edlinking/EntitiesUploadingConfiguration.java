@@ -20,14 +20,14 @@ public interface EntitiesUploadingConfiguration {
     <CH extends ChannelApiDescriptor<? extends Message<? extends MessageHeader, ? extends MessageBody>>,
             E extends EntityObject, O extends DataObject>
     EntityUploadingDescriptor<CH, E, O> getByChannel(
-            @NotNull final CH channelHandleDescriptor
+            @NotNull final CH channelHandlerDescriptor
     ) throws EntitiesDtoLinksConfigurationException;
 
     @NotNull
     <CH extends ChannelApiDescriptor<? extends Message<? extends MessageHeader, ? extends MessageBody>>,
             E extends EntityObject, O extends DataObject>
     EntityUploadingDescriptor<CH, E, O> newDescriptor(
-            @NotNull final CH channelHandleDescriptor,
+            @NotNull final CH channelHandlerDescriptor,
             @NotNull final Class<E> entityClass,
             @NotNull final Class<O> dataObjectClass
     ) throws EntitiesDtoLinksConfigurationException;

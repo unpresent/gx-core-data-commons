@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.data.repository.CrudRepository;
 import ru.gx.core.channels.ChannelApiDescriptor;
-import ru.gx.core.channels.OutcomeChannelHandleDescriptor;
+import ru.gx.core.channels.OutcomeChannelHandlerDescriptor;
 import ru.gx.core.data.DataObject;
 import ru.gx.core.data.DataObjectKeyExtractor;
 import ru.gx.core.data.DataPackage;
