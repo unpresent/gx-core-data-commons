@@ -49,11 +49,11 @@ public abstract class AbstractEntitiesUploadingConfiguration implements Entities
     public <CH extends ChannelApiDescriptor<? extends Message<? extends MessageHeader, ? extends MessageBody>>,
             E extends EntityObject, O extends DataObject>
     EntityUploadingDescriptor<CH, E, O> getByChannel(
-            @NotNull final CH channelHandlerDescriptor
+            @NotNull final CH channelApiDescriptor
     ) throws EntitiesDtoLinksConfigurationException {
-        final var result = this.descriptorsByChannels.get(channelHandlerDescriptor);
+        final var result = this.descriptorsByChannels.get(channelApiDescriptor);
         if (result == null) {
-            throw new EntitiesDtoLinksConfigurationException("Can't get descriptor by channel " + channelHandlerDescriptor.getClass().getName());
+            throw new EntitiesDtoLinksConfigurationException("Can't get descriptor by channel " + channelApiDescriptor.getClass().getName());
         }
         return (EntityUploadingDescriptor<CH, E, O>) result;
     }
@@ -69,7 +69,7 @@ public abstract class AbstractEntitiesUploadingConfiguration implements Entities
             @NotNull final Class<O> dataObjectClass
     ) throws EntitiesDtoLinksConfigurationException {
         if (this.descriptorsByChannels.containsKey(channelApiDescriptor)) {
-            throw new EntitiesDtoLinksConfigurationException("channelHandlerDescriptor " + channelApiDescriptor.getClass().getName() + " already registered!");
+            throw new EntitiesDtoLinksConfigurationException("channelApiDescriptor " + channelApiDescriptor.getClass().getName() + " already registered!");
         }
         final var result = new StandardEntityUploadingDescriptor<>(channelApiDescriptor, entityClass, dataObjectClass);
         this.descriptorsList.add(result);
