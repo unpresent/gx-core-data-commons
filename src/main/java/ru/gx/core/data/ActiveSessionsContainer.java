@@ -4,7 +4,6 @@ import org.hibernate.Session;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
