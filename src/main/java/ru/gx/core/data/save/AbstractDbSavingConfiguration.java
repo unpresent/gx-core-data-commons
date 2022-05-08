@@ -8,6 +8,9 @@ import ru.gx.core.channels.ChannelHandlerDescriptor;
 import ru.gx.core.messaging.Message;
 import ru.gx.core.messaging.MessageBody;
 
+/**
+ * Базовый класс для конфигураций сохранения потоков в БД.
+ */
 public abstract class AbstractDbSavingConfiguration extends AbstractChannelsConfiguration {
     // -------------------------------------------------------------------------------------------------------------
     // <editor-fold desc="Initialization">

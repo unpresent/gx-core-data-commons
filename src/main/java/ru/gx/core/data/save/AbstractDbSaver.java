@@ -29,14 +29,7 @@ public abstract class AbstractDbSaver {
     // <editor-fold desc="Fields">
 
     /**
-     * Реализация метода сохранения в БД
-     */
-    @Getter(PROTECTED)
-    @NotNull
-    private final DbSavingOperator saveOperator;
-
-    /**
-     * Список описателей
+     * Список конфигураций, по которым будем осуществлять обработку (сохранение по необходимости).
      */
     @Getter(PROTECTED)
     @NotNull
