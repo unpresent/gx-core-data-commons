@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import ru.gx.core.data.DataObject;
 import ru.gx.core.data.DataPackage;
+import ru.gx.core.messaging.Message;
 
 import javax.activation.UnsupportedDataTypeException;
 import java.sql.SQLException;
@@ -65,11 +66,32 @@ public abstract class AbstractDbSavingOperator
             @NotNull final DbSavingAccumulateMode accumulateMode
     ) throws SQLException, UnsupportedDataTypeException, JsonProcessingException {
         switch (accumulateMode) {
+            case PerMessage -> internalSavePerMessage(statement, data);
             case PerObject -> internalSavePerObject(statement, data);
             case PerPackage -> internalSavePerPackage(statement, data);
+            case ListOfMessages -> internalSaveListOfMessages(statement, data);
             case ListOfObjects -> internalSaveListOfObjects(statement, data);
             case ListOfPackages -> internalSaveListOfPackages(statement, data);
             default -> throw new UnsupportedDataTypeException("Unsupported accumulateMode = " + accumulateMode);
+        }
+    }
+
+    protected void internalSavePerMessage(
+            @NotNull final Object statement,
+            @NotNull final Object data
+    ) throws SQLException, JsonProcessingException, UnsupportedDataTypeException {
+        if (data instanceof final Message<?> message) {
+            internalSavePreparedMessage(statement, message);
+        } else if (data instanceof final Iterable items) {
+            for (@NotNull final var item : items) {
+                if (item instanceof final Message<?> message) {
+                    internalSavePreparedMessage(statement, message);
+                } else {
+                    throw new UnsupportedDataTypeException("Unsupported class of element Iterable data. Class of element = " + item.getClass().getName());
+                }
+            }
+        } else {
+            throw new UnsupportedDataTypeException("Unsupported class for parameter data. Class = " + data.getClass().getName());
         }
     }
 
@@ -114,6 +136,25 @@ public abstract class AbstractDbSavingOperator
                     throw new UnsupportedDataTypeException("Unsupported class of element Iterable data. Class of element = " + item.getClass().getName());
                 }
             }
+        } else {
+            throw new UnsupportedDataTypeException("Unsupported class for parameter data. Class = " + data.getClass().getName());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void internalSaveListOfMessages(
+            @NotNull final Object statement,
+            @NotNull final Object data
+    ) throws SQLException, JsonProcessingException, UnsupportedDataTypeException {
+        if (data instanceof final Message<?> message) {
+            internalSavePreparedMessage(statement, message);
+        } else if (data instanceof final Iterable items) {
+            for (final var item : items) {
+                if (!(item instanceof Message<?>)) {
+                    throw new UnsupportedDataTypeException("Unsupported class of element Iterable data. Class of element = " + item.getClass().getName());
+                }
+            }
+            internalSavePreparedMessages(statement, items);
         } else {
             throw new UnsupportedDataTypeException("Unsupported class for parameter data. Class = " + data.getClass().getName());
         }
@@ -173,6 +214,16 @@ public abstract class AbstractDbSavingOperator
             throw new UnsupportedDataTypeException("Unsupported class for parameter data. Class = " + data.getClass().getName());
         }
     }
+
+    protected abstract void internalSavePreparedMessage(
+            @NotNull final Object statement,
+            @NotNull final Message<?> message
+    ) throws SQLException, JsonProcessingException;
+
+    protected abstract void internalSavePreparedMessages(
+            @NotNull final Object statement,
+            @NotNull final Iterable<Message<?>> messages
+    ) throws SQLException, JsonProcessingException;
 
     protected abstract void internalSavePreparedDataObject(
             @NotNull final Object statement,

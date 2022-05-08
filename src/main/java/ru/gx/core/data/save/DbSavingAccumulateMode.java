@@ -6,6 +6,12 @@ package ru.gx.core.data.save;
 @SuppressWarnings("unused")
 public enum DbSavingAccumulateMode {
     /**
+     * Без переупаковки, сохранение по одному сообщению.
+     * При это группа сообщений может сохраняться в рамках одной транзакции.
+     */
+    PerMessage,
+
+    /**
      * Без переупаковки, сохранение по одному объекту.
      * При это группа объектов может сохраняться в рамках одной транзакции.
      */
@@ -18,12 +24,17 @@ public enum DbSavingAccumulateMode {
     PerPackage,
 
     /**
-     * Отправка в БД списка пакетов
+     * Отправка в БД списка сообщений
      */
-    ListOfPackages,
+    ListOfMessages,
 
     /**
      * Отправка в БД списка объектов
      */
-    ListOfObjects
+    ListOfObjects,
+
+    /**
+     * Отправка в БД списка пакетов
+     */
+    ListOfPackages
 }

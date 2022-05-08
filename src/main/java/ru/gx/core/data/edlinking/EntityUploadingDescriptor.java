@@ -15,7 +15,7 @@ import ru.gx.core.messaging.MessageHeader;
 
 @SuppressWarnings("unused")
 public interface EntityUploadingDescriptor
-        <CH extends ChannelApiDescriptor<? extends Message<? extends MessageHeader, ? extends MessageBody>>,
+        <CH extends ChannelApiDescriptor<? extends Message<? extends MessageBody>>,
                 E extends EntityObject, O extends DataObject> {
 
     @NotNull

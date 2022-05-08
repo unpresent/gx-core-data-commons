@@ -13,18 +13,18 @@ public interface EntitiesUploadingConfiguration {
 
     @NotNull
     Iterable<EntityUploadingDescriptor<
-            ? extends ChannelApiDescriptor<? extends Message<? extends MessageHeader, ? extends MessageBody>>,
+            ? extends ChannelApiDescriptor<? extends Message<? extends MessageBody>>,
             ? extends EntityObject, ? extends DataObject>> getAll();
 
     @NotNull
-    <CH extends ChannelApiDescriptor<? extends Message<? extends MessageHeader, ? extends MessageBody>>,
+    <CH extends ChannelApiDescriptor<? extends Message<? extends MessageBody>>,
             E extends EntityObject, O extends DataObject>
     EntityUploadingDescriptor<CH, E, O> getByChannel(
             @NotNull final CH channelApiDescriptor
     ) throws EntitiesDtoLinksConfigurationException;
 
     @NotNull
-    <CH extends ChannelApiDescriptor<? extends Message<? extends MessageHeader, ? extends MessageBody>>,
+    <CH extends ChannelApiDescriptor<? extends Message<? extends MessageBody>>,
             E extends EntityObject, O extends DataObject>
     EntityUploadingDescriptor<CH, E, O> newDescriptor(
             @NotNull final CH channelApiDescriptor,

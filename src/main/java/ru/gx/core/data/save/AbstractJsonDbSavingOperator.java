@@ -6,7 +6,9 @@ import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import ru.gx.core.data.DataObject;
 import ru.gx.core.data.DataPackage;
+import ru.gx.core.messaging.Message;
 
+import javax.activation.UnsupportedDataTypeException;
 import java.sql.SQLException;
 
 @Accessors(chain = true)
@@ -17,6 +19,24 @@ public abstract class AbstractJsonDbSavingOperator
             @NotNull final ObjectMapper objectMapper
     ) {
         super(objectMapper);
+    }
+
+    @Override
+    protected void internalSavePreparedMessage(
+            @NotNull final Object statement,
+            @NotNull final Message<?> message
+    ) throws SQLException, JsonProcessingException {
+        final var data = getObjectMapper().writeValueAsString(message);
+        executeStatement(statement, data);
+    }
+
+    @Override
+    protected void internalSavePreparedMessages(
+            @NotNull final Object statement,
+            @NotNull final Iterable<Message<?>> messages
+    ) throws SQLException, JsonProcessingException {
+        final var data = getObjectMapper().writeValueAsString(messages);
+        executeStatement(statement, data);
     }
 
     @Override

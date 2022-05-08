@@ -16,14 +16,14 @@ public abstract class AbstractEntitiesUploadingConfiguration implements Entities
     @NotNull
     private final ArrayList<
             EntityUploadingDescriptor<
-                    ? extends ChannelApiDescriptor<? extends Message<? extends MessageHeader, ? extends MessageBody>>,
+                    ? extends ChannelApiDescriptor<? extends Message<? extends MessageBody>>,
                     ? extends EntityObject, ? extends DataObject>> descriptorsList = new ArrayList<>();
 
     @SuppressWarnings("rawtypes")
     @NotNull
     private final Map<ChannelApiDescriptor,
             EntityUploadingDescriptor<
-                    ? extends ChannelApiDescriptor<? extends Message<? extends MessageHeader, ? extends MessageBody>>,
+                    ? extends ChannelApiDescriptor<? extends Message<? extends MessageBody>>,
                     ? extends EntityObject, ? extends DataObject>> descriptorsByChannels = new HashMap<>();
 
     protected AbstractEntitiesUploadingConfiguration() {
@@ -38,7 +38,7 @@ public abstract class AbstractEntitiesUploadingConfiguration implements Entities
     @Override
     @NotNull
     public Iterable<EntityUploadingDescriptor<
-            ? extends ChannelApiDescriptor<? extends Message<? extends MessageHeader, ? extends MessageBody>>,
+            ? extends ChannelApiDescriptor<? extends Message<? extends MessageBody>>,
             ? extends EntityObject, ? extends DataObject>> getAll() {
         return this.descriptorsList;
     }
@@ -46,7 +46,7 @@ public abstract class AbstractEntitiesUploadingConfiguration implements Entities
     @SuppressWarnings("unchecked")
     @Override
     @NotNull
-    public <CH extends ChannelApiDescriptor<? extends Message<? extends MessageHeader, ? extends MessageBody>>,
+    public <CH extends ChannelApiDescriptor<? extends Message<? extends MessageBody>>,
             E extends EntityObject, O extends DataObject>
     EntityUploadingDescriptor<CH, E, O> getByChannel(
             @NotNull final CH channelApiDescriptor
@@ -61,7 +61,7 @@ public abstract class AbstractEntitiesUploadingConfiguration implements Entities
 
     @Override
     @NotNull
-    public <CH extends ChannelApiDescriptor<? extends Message<? extends MessageHeader, ? extends MessageBody>>,
+    public <CH extends ChannelApiDescriptor<? extends Message<? extends MessageBody>>,
             E extends EntityObject, O extends DataObject>
     EntityUploadingDescriptor<CH, E, O> newDescriptor(
             @NotNull final CH channelApiDescriptor,

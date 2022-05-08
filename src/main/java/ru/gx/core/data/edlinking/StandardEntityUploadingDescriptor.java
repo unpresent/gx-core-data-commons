@@ -23,7 +23,7 @@ import ru.gx.core.messaging.MessageHeader;
 @EqualsAndHashCode(callSuper = false)
 @ToString
 public class StandardEntityUploadingDescriptor
-        <CH extends ChannelApiDescriptor<? extends Message<? extends MessageHeader, ? extends MessageBody>>,
+        <CH extends ChannelApiDescriptor<? extends Message<? extends MessageBody>>,
                 E extends EntityObject, O extends DataObject>
         implements EntityUploadingDescriptor<CH, E, O> {
 
