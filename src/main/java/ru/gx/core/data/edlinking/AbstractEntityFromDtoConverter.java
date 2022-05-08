@@ -18,7 +18,7 @@ public abstract class AbstractEntityFromDtoConverter<DEST extends EntityObject, 
      */
     @Override
     @Nullable
-    public abstract DEST findDtoBySource(@Nullable SOURCE source);
+    public abstract DEST findEntityBySource(@Nullable SOURCE source);
 
     /**
      * Создание объекта по источнику (DataObject).
@@ -26,7 +26,7 @@ public abstract class AbstractEntityFromDtoConverter<DEST extends EntityObject, 
      */
     @Override
     @NotNull
-    public abstract DEST createDtoBySource(@NotNull SOURCE source);
+    public abstract DEST createEntityBySource(@NotNull SOURCE source);
 
     /**
      * @param destination Объект-назначения данных.
@@ -51,9 +51,9 @@ public abstract class AbstractEntityFromDtoConverter<DEST extends EntityObject, 
     @Override
     public void fillDtoCollectionFromSource(@NotNull Collection<DEST> destination, @NotNull Iterable<SOURCE> source) throws NotAllowedObjectUpdateException {
         for (var sourceObject : source) {
-            var destObject = findDtoBySource(sourceObject);
+            var destObject = findEntityBySource(sourceObject);
             if (destObject == null) {
-                destObject = createDtoBySource(sourceObject);
+                destObject = createEntityBySource(sourceObject);
             } else if (isDestinationUpdatable(destObject)) {
                 updateDtoBySource(destObject, sourceObject);
             }

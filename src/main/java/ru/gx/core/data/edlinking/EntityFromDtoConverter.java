@@ -16,14 +16,14 @@ public interface EntityFromDtoConverter<DEST extends EntityObject, SOURCE extend
      * @param source        Объект (DataObject), из которого берем данные.
      */
     @Nullable
-    DEST findDtoBySource(@Nullable final SOURCE source);
+    DEST findEntityBySource(@Nullable final SOURCE source);
 
     /**
      * Создание объекта по источнику (DataObject).
      * @param source        Объект (DataObject), из которого берем данные.
      */
     @NotNull
-    DEST createDtoBySource(@NotNull final SOURCE source);
+    DEST createEntityBySource(@NotNull final SOURCE source);
 
     /**
      * @param destination Объект-назначения данных.

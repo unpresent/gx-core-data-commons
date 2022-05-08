@@ -1,8 +1,14 @@
 package ru.gx.core.data.save;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.jetbrains.annotations.NotNull;
 import ru.gx.core.data.DataObject;
+import ru.gx.core.data.DataPackage;
 
-public interface DbSavingDescriptor<O extends DataObject> {
+import javax.activation.UnsupportedDataTypeException;
+import java.sql.SQLException;
+
+public interface DbSavingDescriptor {
     // -----------------------------------------------------------------------------------------------------------------
     // <editor-fold desc="Constants">
 
@@ -34,7 +40,12 @@ public interface DbSavingDescriptor<O extends DataObject> {
     /**
      * @return класс объектов сохраняемых данных
      */
-    Class<O> getDataObjectClass();
+    Class<? extends DataObject> getDataObjectClass();
+
+    /**
+     * @return класс пакета объектов сохраняемых данных
+     */
+    Class<? extends DataPackage<?>> getDataPackageClass();
 
     /**
      * @return SQL сохранения в БД
@@ -81,6 +92,20 @@ public interface DbSavingDescriptor<O extends DataObject> {
      * @return или накоплен буфер достаточного размера, или прошло достаточно времени накопления.
      */
     boolean readyForSave();
+
+    /**
+     * Добавить в буфер/сохранить немедленно объект данных
+     * @param dataObject объект данных
+     */
+    void addSavingObject(@NotNull final DataObject dataObject) throws SQLException, UnsupportedDataTypeException, JsonProcessingException;
+
+    /**
+     * Добавить в буфер/сохранить немедленно пакет объектов
+     * @param dataPackage пакет объектов данных
+     */
+    void addSavingPackage(@NotNull final DataPackage<?> dataPackage) throws SQLException, UnsupportedDataTypeException, JsonProcessingException;
+
+    void checkNeedToSave() throws SQLException, UnsupportedDataTypeException, JsonProcessingException;
 
     /**
      * @return Инициализировал ли описатель. После инициализации нельзя менять ряд параметров.
