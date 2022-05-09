@@ -168,7 +168,6 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
     // </editor-fold>
     // -----------------------------------------------------------------------------------------------------------------
     // <editor-fold desc="Initialize">
-    @SuppressWarnings("unchecked")
     public DbSavingDescriptor(
             @NotNull final AbstractDbSavingConfiguration owner,
             @NotNull final ChannelApiDescriptor<M> api,
@@ -190,13 +189,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
             this.bufferForMs = DbSavingDescriptorsDefaults.DEFAULTS_BUFFER_FOR_MS;
         }
 
-        final var thisClass = this.getClass();
-        final var superClass = thisClass.getGenericSuperclass();
-        if (superClass != null) {
-            this.messageClass = (Class<M>) ((ParameterizedType) superClass).getActualTypeArguments()[0];
-        } else {
-            throw new ChannelConfigurationException("Descriptor for saving messages doesn't have messageClass!");
-        }
+        this.messageClass = api.getMessageClass();
     }
 
     /**

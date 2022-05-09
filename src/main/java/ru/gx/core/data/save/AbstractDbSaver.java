@@ -44,7 +44,9 @@ public abstract class AbstractDbSaver {
         for (final var config : getConfigurations()) {
             for (final var descriptor : config.getAll()) {
                 final var savingDescriptor = (DbSavingDescriptor<?>)descriptor;
-                savingDescriptor.checkNeedToSave();
+                if (savingDescriptor.getProcessMode() == DbSavingProcessMode.UseBuffer) {
+                    savingDescriptor.checkNeedToSave();
+                }
             }
         }
     }
