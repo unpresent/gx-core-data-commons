@@ -38,7 +38,7 @@ public abstract class AbstractDbSaver {
     // </editor-fold>
     // -----------------------------------------------------------------------------------------------------------------
     // <editor-fold desc="Реализация ">
-    @Scheduled(initialDelay = INTERVAL_MS_FOR_CHECK_NEED_SAVE)
+    @Scheduled(fixedDelay = INTERVAL_MS_FOR_CHECK_NEED_SAVE)
     protected void internalCheckNeedSave()
             throws SQLException, UnsupportedDataTypeException, JsonProcessingException {
         for (final var config : getConfigurations()) {
