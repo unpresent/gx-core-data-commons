@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.activation.UnsupportedDataTypeException;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +41,7 @@ public abstract class AbstractDbSaver {
     // <editor-fold desc="Реализация ">
     @Scheduled(fixedDelay = INTERVAL_MS_FOR_CHECK_NEED_SAVE)
     protected void internalCheckNeedSave()
-            throws SQLException, UnsupportedDataTypeException, JsonProcessingException {
+            throws SQLException, IOException {
         for (final var config : getConfigurations()) {
             for (final var descriptor : config.getAll()) {
                 final var savingDescriptor = (DbSavingDescriptor<?>)descriptor;

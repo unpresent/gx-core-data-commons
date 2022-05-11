@@ -14,4 +14,10 @@ public interface ConnectionWrapper extends Closeable {
 
     @NotNull
     SqlCommandWrapper getCallable(@NotNull String sqlCommand) throws SQLException;
+
+    boolean openTransaction();
+
+    boolean commitTransaction();
+
+    boolean rollbackTransaction();
 }

@@ -5,6 +5,8 @@ import lombok.*;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import ru.gx.core.channels.AbstractOutcomeChannelHandlerDescriptor;
 import ru.gx.core.channels.ChannelApiDescriptor;
 import ru.gx.core.channels.ChannelConfigurationException;
@@ -16,6 +18,7 @@ import ru.gx.core.messaging.MessageSimpleBody;
 import ru.gx.core.messaging.MessagesFactory;
 
 import javax.activation.UnsupportedDataTypeException;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.security.InvalidParameterException;
@@ -26,6 +29,7 @@ import java.util.List;
 
 import static lombok.AccessLevel.PROTECTED;
 
+@SuppressWarnings("unused")
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 @ToString
@@ -165,6 +169,21 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
     @Nullable
     private Object saveStatement;
 
+    /**
+     * Событие, которые вызывается сразу после сохранения данных в БД.
+     * При этом оно будет вызвано внутри транзакции, если установлено свойство {@link DbSavingDescriptor#useTransactionDueSave}
+     */
+    @Getter(PROTECTED)
+    @Nullable
+    private ApplicationEvent eventAfterSave;
+
+    /**
+     * Признак необходимости сохранять данные в транзакции. Если true, то транзакция открывается до начала сохранения,
+     * а закрывается после обработки события о сохранении данных.
+     */
+    @Getter(PROTECTED)
+    private boolean useTransactionDueSave;
+
     // </editor-fold>
     // -----------------------------------------------------------------------------------------------------------------
     // <editor-fold desc="Initialize">
@@ -181,12 +200,14 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
             this.bufferLimit = defaults.getBufferLimit();
             this.bufferForMs = defaults.getBufferForMs();
             this.saveOperator = defaults.getSaveOperator();
+            this.useTransactionDueSave = defaults.isUseTransactionDueSave();
         } else {
             this.processMode = DbSavingDescriptorsDefaults.DEFAULT_PROCESS_MODE;
             this.accumulateMode = DbSavingDescriptorsDefaults.DEFAULT_ACCUMULATE_MODE;
             this.serializeMode = DbSavingDescriptorsDefaults.DEFAULT_SERIALIZE_MODE;
             this.bufferLimit = DbSavingDescriptorsDefaults.DEFAULTS_BUFFER_LIMIT;
             this.bufferForMs = DbSavingDescriptorsDefaults.DEFAULTS_BUFFER_FOR_MS;
+            this.useTransactionDueSave = DbSavingDescriptorsDefaults.DEFAULT_USE_TRAN_IN_SAVE;
         }
 
         this.messageClass = api.getMessageClass();
@@ -400,6 +421,22 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
         return this;
     }
 
+    /**
+     * Setter свойства useTransactionDueSave
+     *
+     * @param useTransactionDueSave признак необходимости сохранять данные в транзакции
+     * @return this
+     */
+    @NotNull
+    public DbSavingDescriptor<M> setUseTransactionDueSave(boolean useTransactionDueSave) {
+        if (this.useTransactionDueSave == useTransactionDueSave) {
+            return this;
+        }
+        checkMutable("useTransactionDueSave");
+        this.useTransactionDueSave = useTransactionDueSave;
+        return this;
+    }
+
     // </editor-fold>
     // -----------------------------------------------------------------------------------------------------------------
     // <editor-fold desc="Saving realization">
@@ -429,8 +466,10 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
      * @param message Сообщение
      */
     @SuppressWarnings("unchecked")
-    public void processMessage(@NotNull final M message)
-            throws SQLException, UnsupportedDataTypeException, JsonProcessingException {
+    public void processMessage(
+            @NotNull final M message,
+            @Nullable final ApplicationEvent eventAfterSave
+    ) throws SQLException, IOException {
         switch (getAccumulateMode()) {
             case PerMessage, ListOfMessages -> getMessages().add(message);
             case PerObject, ListOfObjects -> {
@@ -465,6 +504,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
             }
             default -> throw new UnsupportedOperationException("Unknown accumulateMode " + getAccumulateMode());
         }
+        this.eventAfterSave = eventAfterSave;
         checkNeedToSave();
     }
 
@@ -485,11 +525,14 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
     /**
      * Добавить в буфер/сохранить немедленно объект данных
      *
-     * @param dataObject объект данных
+     * @param dataObject     объект данных
+     * @param eventAfterSave событие, которое будет вызываться через Spring Events после сохранения данных.
      */
     @SuppressWarnings("unchecked")
-    public void processObject(@NotNull DataObject dataObject)
-            throws SQLException, UnsupportedDataTypeException, JsonProcessingException {
+    public void processObject(
+            @NotNull final DataObject dataObject,
+            @Nullable final ApplicationEvent eventAfterSave
+    ) throws SQLException, IOException {
         switch (getAccumulateMode()) {
             case PerMessage, ListOfMessages -> internalCreateAndAddMessageByDataObject(dataObject);
             case PerObject, ListOfObjects -> getObjects().add(dataObject);
@@ -503,6 +546,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
             }
             default -> throw new UnsupportedOperationException("Unknown accumulateMode " + getAccumulateMode());
         }
+        this.eventAfterSave = eventAfterSave;
         checkNeedToSave();
     }
 
@@ -511,8 +555,10 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
      *
      * @param dataPackage пакет объектов данных
      */
-    public void processPackage(@NotNull DataPackage<?> dataPackage)
-            throws SQLException, UnsupportedDataTypeException, JsonProcessingException {
+    public void processPackage(
+            @NotNull final DataPackage<?> dataPackage,
+            @Nullable final ApplicationEvent eventAfterSave
+    ) throws SQLException, IOException {
         switch (getAccumulateMode()) {
             case PerMessage, ListOfMessages -> internalCreateAndAddMessageByDataPackage(dataPackage);
             case PerObject, ListOfObjects -> dataPackage
@@ -522,10 +568,11 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
                     .add(dataPackage);
             default -> throw new UnsupportedOperationException("Unknown accumulateMode " + getAccumulateMode());
         }
+        this.eventAfterSave = eventAfterSave;
         checkNeedToSave();
     }
 
-    public void checkNeedToSave() throws SQLException, UnsupportedDataTypeException, JsonProcessingException {
+    public void checkNeedToSave() throws SQLException, IOException {
         if (isInitialized() && readyForSave()) {
             internalSaveData();
         }
@@ -599,7 +646,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
     }
 
     protected synchronized void internalSaveData()
-            throws SQLException, UnsupportedDataTypeException, JsonProcessingException {
+            throws SQLException, IOException {
         final var descriptorName = getMessageClass().getName();
         if (!isInitialized()) {
             throw new ChannelConfigurationException("Descriptor for saving of " + descriptorName + " is not initialized!");
@@ -614,14 +661,36 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
         try {
             final var vSaveOperator = getSaveOperator();
             final var accumulateMode = getAccumulateMode();
-            if (getSaveStatement() == null) {
-                this.saveStatement = vSaveOperator.prepareStatement(getSaveCommand(), accumulateMode);
-            }
-            switch (accumulateMode) {
-                case PerMessage, ListOfMessages -> vSaveOperator.saveData(getSaveStatement(), getMessages(), accumulateMode);
-                case PerObject, ListOfObjects -> vSaveOperator.saveData(getSaveStatement(), getObjects(), accumulateMode);
-                case PerPackage, ListOfPackages -> vSaveOperator.saveData(getSaveStatement(), getPackages(), accumulateMode);
-                default -> throw new IllegalStateException("Unexpected value: " + accumulateMode);
+
+            try (final var connect = getOwner().getThreadConnectionsWrapper().getCurrentThreadConnection()) {
+                if (getSaveStatement() == null) {
+                    this.saveStatement = vSaveOperator.prepareStatement(getSaveCommand(), accumulateMode);
+                }
+
+                if (isUseTransactionDueSave()) {
+                    connect.openTransaction();
+                }
+                try {
+                    switch (accumulateMode) {
+                        case PerMessage, ListOfMessages -> vSaveOperator.saveData(getSaveStatement(), getMessages(), accumulateMode);
+                        case PerObject, ListOfObjects -> vSaveOperator.saveData(getSaveStatement(), getObjects(), accumulateMode);
+                        case PerPackage, ListOfPackages -> vSaveOperator.saveData(getSaveStatement(), getPackages(), accumulateMode);
+                        default -> throw new IllegalStateException("Unexpected value: " + accumulateMode);
+                    }
+
+                    final var event = getEventAfterSave();
+                    if (event != null) {
+                        getOwner().getEventPublisher().publishEvent(event);
+                    }
+                    if (isUseTransactionDueSave()) {
+                        connect.openTransaction();
+                    }
+                } catch (Exception e) {
+                    if (isUseTransactionDueSave()) {
+                        connect.rollbackTransaction();
+                        throw e;
+                    }
+                }
             }
         } finally {
             resetBuffer();

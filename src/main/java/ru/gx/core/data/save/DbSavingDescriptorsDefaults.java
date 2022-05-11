@@ -45,6 +45,8 @@ public class DbSavingDescriptorsDefaults extends OutcomeChannelDescriptorsDefaul
      * Режим накопления и отправки данных в БД.
      */
     public static final DbSavingAccumulateMode DEFAULT_ACCUMULATE_MODE = DbSavingAccumulateMode.ListOfObjects;
+
+    public static final boolean DEFAULT_USE_TRAN_IN_SAVE = true;
     // </editor-fold>
     // -------------------------------------------------------------------------------------------------------------
     // <editor-fold desc="Fields">
@@ -82,6 +84,8 @@ public class DbSavingDescriptorsDefaults extends OutcomeChannelDescriptorsDefaul
      */
     @Nullable
     private DbSavingOperator saveOperator;
+
+    private boolean useTransactionDueSave;
     // </editor-fold>
     // -------------------------------------------------------------------------------------------------------------
 }
