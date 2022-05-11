@@ -683,7 +683,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
                         getOwner().getEventPublisher().publishEvent(event);
                     }
                     if (isUseTransactionDueSave()) {
-                        connect.openTransaction();
+                        connect.commitTransaction();
                     }
                 } catch (Exception e) {
                     if (isUseTransactionDueSave()) {

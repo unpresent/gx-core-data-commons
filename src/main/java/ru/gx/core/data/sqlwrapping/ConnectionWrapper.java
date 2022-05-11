@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Closeable;
 import java.sql.SQLException;
 
+@SuppressWarnings("unused")
 public interface ConnectionWrapper extends Closeable {
     @NotNull
     Object getInternalConnection();
@@ -15,9 +16,9 @@ public interface ConnectionWrapper extends Closeable {
     @NotNull
     SqlCommandWrapper getCallable(@NotNull String sqlCommand) throws SQLException;
 
-    boolean openTransaction();
+    void openTransaction() throws SQLException;
 
-    boolean commitTransaction();
+    void commitTransaction() throws SQLException;
 
-    boolean rollbackTransaction();
+    void rollbackTransaction() throws SQLException;
 }
