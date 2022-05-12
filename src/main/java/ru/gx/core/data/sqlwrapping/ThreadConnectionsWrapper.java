@@ -9,8 +9,4 @@ import java.sql.SQLException;
 public interface ThreadConnectionsWrapper {
     @NotNull
     ConnectionWrapper getCurrentThreadConnection() throws SQLException, IOException;
-
-    void putCurrentThreadConnection(@NotNull ConnectionWrapper connectionWrapper) throws SQLException, IOException;
-
-    void clearCurrentThreadConnection() throws SQLException, IOException;
 }

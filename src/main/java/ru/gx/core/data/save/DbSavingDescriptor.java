@@ -1,12 +1,11 @@
 package ru.gx.core.data.save;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.*;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationEventPublisher;
 import ru.gx.core.channels.AbstractOutcomeChannelHandlerDescriptor;
 import ru.gx.core.channels.ChannelApiDescriptor;
 import ru.gx.core.channels.ChannelConfigurationException;
@@ -17,10 +16,8 @@ import ru.gx.core.messaging.MessageBody;
 import ru.gx.core.messaging.MessageSimpleBody;
 import ru.gx.core.messaging.MessagesFactory;
 
-import javax.activation.UnsupportedDataTypeException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.ParameterizedType;
 import java.security.InvalidParameterException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -33,6 +30,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
 @ToString
+@Slf4j
 public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
         extends AbstractOutcomeChannelHandlerDescriptor<M> {
     // -----------------------------------------------------------------------------------------------------------------
@@ -448,9 +446,18 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
      * @return или накоплен буфер достаточного размера, или прошло достаточно времени накопления.
      */
     public boolean readyForSave() {
-        return getProcessMode() == DbSavingProcessMode.Immediate
-                || getObjects().size() >= getBufferLimit()
-                || getLastSavedIntervalMs() >= getBufferForMs();
+        if (getProcessMode() == DbSavingProcessMode.Immediate) {
+            return true;
+        }
+
+        final var collection = switch (getAccumulateMode()) {
+            case PerMessage, ListOfMessages -> getMessages();
+            case PerObject, ListOfObjects -> getObjects();
+            case PerPackage, ListOfPackages -> getPackages();
+        };
+
+        return collection.size() >= getBufferLimit()
+                || (getLastSavedIntervalMs() > getBufferForMs() && !collection.isEmpty());
     }
 
     /**
@@ -572,14 +579,16 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
         checkNeedToSave();
     }
 
-    public void checkNeedToSave() throws SQLException, IOException {
+    public synchronized void checkNeedToSave() throws SQLException, IOException {
         if (isInitialized() && readyForSave()) {
             internalSaveData();
         }
     }
 
     public void resetBuffer() {
-        this.objects.clear();
+        getMessages().clear();
+        getObjects().clear();
+        getPackages().clear();
         this.lastSavedTimeMillis = System.currentTimeMillis();
     }
 
@@ -686,6 +695,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
                         connect.commitTransaction();
                     }
                 } catch (Exception e) {
+                    log.error("", e);
                     if (isUseTransactionDueSave()) {
                         connect.rollbackTransaction();
                         throw e;

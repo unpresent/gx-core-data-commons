@@ -15,6 +15,7 @@ public interface SqlCommandWrapper extends Closeable {
     void setIntegerParam(int paramIndex, @Nullable Integer value) throws SQLException;
     void setLongParam(int paramIndex, @Nullable Long value) throws SQLException;
     void setNumericParam(int paramIndex, @Nullable BigDecimal value) throws SQLException;
+    void setBinaryParam(int paramIndex, byte[] value) throws SQLException;
 
     void executeNoResult() throws SQLException;
 

@@ -13,7 +13,6 @@ import ru.gx.core.messaging.Message;
 import javax.activation.UnsupportedDataTypeException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.stream.Stream;
 
 @Accessors(chain = true)
 public abstract class AbstractDbSavingOperator

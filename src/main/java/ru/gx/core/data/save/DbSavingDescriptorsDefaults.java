@@ -9,8 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.gx.core.channels.OutcomeChannelDescriptorsDefaults;
 
-import java.util.Properties;
-
 @SuppressWarnings("unused")
 @Getter
 @Setter

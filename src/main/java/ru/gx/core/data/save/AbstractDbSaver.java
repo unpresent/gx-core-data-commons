@@ -1,15 +1,12 @@
 package ru.gx.core.data.save;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import javax.activation.UnsupportedDataTypeException;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static lombok.AccessLevel.PROTECTED;
@@ -34,7 +31,7 @@ public abstract class AbstractDbSaver {
      */
     @Getter(PROTECTED)
     @NotNull
-    private final List<AbstractDbSavingConfiguration> configurations = new ArrayList<>();
+    private final List<DbSavingConfiguration> configurations;
 
     // </editor-fold>
     // -----------------------------------------------------------------------------------------------------------------

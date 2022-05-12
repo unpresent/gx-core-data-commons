@@ -8,7 +8,6 @@ import ru.gx.core.data.DataObject;
 import ru.gx.core.data.DataPackage;
 import ru.gx.core.messaging.Message;
 
-import javax.activation.UnsupportedDataTypeException;
 import java.sql.SQLException;
 
 @Accessors(chain = true)
