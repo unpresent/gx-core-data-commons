@@ -478,8 +478,17 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
             @Nullable final ApplicationEvent eventAfterSave
     ) throws SQLException, IOException {
         switch (getAccumulateMode()) {
-            case PerMessage, ListOfMessages -> getMessages().add(message);
+            case PerMessage, ListOfMessages -> {
+                if (getMessages().isEmpty()) {
+                    resetBuffer();
+                }
+                getMessages().add(message);
+            }
             case PerObject, ListOfObjects -> {
+                if (getObjects().isEmpty()) {
+                    resetBuffer();
+                }
+
                 final var data = internalExtractData(message);
                 if (data instanceof final DataObject dataObject) {
                     getObjects().add(dataObject);
@@ -492,6 +501,10 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
                 }
             }
             case PerPackage, ListOfPackages -> {
+                if (getPackages().isEmpty()) {
+                    resetBuffer();
+                }
+
                 final var packs = getPackages();
                 final var lastPackage = packs.isEmpty()
                         ? internalCreateAndAddDataPackage()
