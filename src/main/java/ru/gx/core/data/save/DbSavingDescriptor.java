@@ -488,7 +488,6 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
                 if (getObjects().isEmpty()) {
                     resetBuffer();
                 }
-
                 final var data = internalExtractData(message);
                 if (data instanceof final DataObject dataObject) {
                     getObjects().add(dataObject);
@@ -504,7 +503,6 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
                 if (getPackages().isEmpty()) {
                     resetBuffer();
                 }
-
                 final var packs = getPackages();
                 final var lastPackage = packs.isEmpty()
                         ? internalCreateAndAddDataPackage()
@@ -554,9 +552,22 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
             @Nullable final ApplicationEvent eventAfterSave
     ) throws SQLException, IOException {
         switch (getAccumulateMode()) {
-            case PerMessage, ListOfMessages -> internalCreateAndAddMessageByDataObject(dataObject);
-            case PerObject, ListOfObjects -> getObjects().add(dataObject);
+            case PerMessage, ListOfMessages -> {
+                if (getMessages().isEmpty()) {
+                    resetBuffer();
+                }
+                internalCreateAndAddMessageByDataObject(dataObject);
+            }
+            case PerObject, ListOfObjects -> {
+                if (getObjects().isEmpty()) {
+                    resetBuffer();
+                }
+                getObjects().add(dataObject);
+            }
             case PerPackage, ListOfPackages -> {
+                if (getPackages().isEmpty()) {
+                    resetBuffer();
+                }
                 final var packs = getPackages();
                 final var lastPackage = packs.isEmpty()
                         ? internalCreateAndAddDataPackage()
@@ -580,12 +591,26 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
             @Nullable final ApplicationEvent eventAfterSave
     ) throws SQLException, IOException {
         switch (getAccumulateMode()) {
-            case PerMessage, ListOfMessages -> internalCreateAndAddMessageByDataPackage(dataPackage);
-            case PerObject, ListOfObjects -> dataPackage
-                    .getObjects()
-                    .forEach(o -> getObjects().add(o));
-            case PerPackage, ListOfPackages -> getPackages()
-                    .add(dataPackage);
+            case PerMessage, ListOfMessages -> {
+                if (getMessages().isEmpty()) {
+                    resetBuffer();
+                }
+                internalCreateAndAddMessageByDataPackage(dataPackage);
+            }
+            case PerObject, ListOfObjects -> {
+                if (getObjects().isEmpty()) {
+                    resetBuffer();
+                }
+                dataPackage
+                        .getObjects()
+                        .forEach(o -> getObjects().add(o));
+            }
+            case PerPackage, ListOfPackages -> {
+                if (getPackages().isEmpty()) {
+                    resetBuffer();
+                }
+                getPackages().add(dataPackage);
+            }
             default -> throw new UnsupportedOperationException("Unknown accumulateMode " + getAccumulateMode());
         }
         this.eventAfterSave = eventAfterSave;
