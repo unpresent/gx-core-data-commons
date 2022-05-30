@@ -457,7 +457,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
         };
 
         return collection.size() >= getBufferLimit()
-                || (getLastSavedIntervalMs() > getBufferForMs() && !collection.isEmpty());
+                || (getBufferForMs() > 0 && getLastSavedIntervalMs() > getBufferForMs() && !collection.isEmpty());
     }
 
     /**
