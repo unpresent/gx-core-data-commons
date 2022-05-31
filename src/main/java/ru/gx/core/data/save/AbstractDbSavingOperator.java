@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import ru.gx.core.data.DataObject;
 import ru.gx.core.data.DataPackage;
+import ru.gx.core.data.sqlwrapping.SqlCommandWrapper;
 import ru.gx.core.messaging.Message;
 
 import javax.activation.UnsupportedDataTypeException;
@@ -39,7 +40,7 @@ public abstract class AbstractDbSavingOperator
      */
     @Override
     @NotNull
-    public abstract Object prepareStatement(
+    public abstract SqlCommandWrapper prepareStatement(
             @NotNull final String sqlCommand,
             @NotNull final DbSavingAccumulateMode accumulateMode
     ) throws SQLException;
@@ -60,7 +61,7 @@ public abstract class AbstractDbSavingOperator
      */
     @Override
     public void saveData(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final Object data,
             @NotNull final DbSavingAccumulateMode accumulateMode
     ) throws SQLException, UnsupportedDataTypeException, JsonProcessingException {
@@ -76,7 +77,7 @@ public abstract class AbstractDbSavingOperator
     }
 
     protected void internalSavePerMessage(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final Object data
     ) throws SQLException, JsonProcessingException, UnsupportedDataTypeException {
         if (data instanceof final Message<?> message) {
@@ -95,7 +96,7 @@ public abstract class AbstractDbSavingOperator
     }
 
     protected void internalSavePerObject(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final Object data
     ) throws SQLException, JsonProcessingException, UnsupportedDataTypeException {
         if (data instanceof final DataObject dataObject) {
@@ -122,7 +123,7 @@ public abstract class AbstractDbSavingOperator
     }
 
     protected void internalSavePerPackage(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final Object data
     ) throws SQLException, JsonProcessingException, UnsupportedDataTypeException {
         if (data instanceof final DataPackage dataPackage) {
@@ -142,7 +143,7 @@ public abstract class AbstractDbSavingOperator
 
     @SuppressWarnings("unchecked")
     protected void internalSaveListOfMessages(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final Object data
     ) throws SQLException, JsonProcessingException, UnsupportedDataTypeException {
         if (data instanceof final Message<?> message) {
@@ -161,7 +162,7 @@ public abstract class AbstractDbSavingOperator
 
     @SuppressWarnings("unchecked")
     protected void internalSaveListOfObjects(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final Object data
     ) throws SQLException, JsonProcessingException, UnsupportedDataTypeException {
         if (data instanceof final DataPackage dataPackage) {
@@ -197,7 +198,7 @@ public abstract class AbstractDbSavingOperator
 
     @SuppressWarnings("unchecked")
     protected void internalSaveListOfPackages(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final Object data
     ) throws SQLException, JsonProcessingException, UnsupportedDataTypeException {
         if (data instanceof final DataPackage dataPackage) {
@@ -215,37 +216,37 @@ public abstract class AbstractDbSavingOperator
     }
 
     protected abstract void internalSavePreparedMessage(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final Message<?> message
     ) throws SQLException, JsonProcessingException;
 
     protected abstract void internalSavePreparedMessages(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final Iterable<Message<?>> messages
     ) throws SQLException, JsonProcessingException;
 
     protected abstract void internalSavePreparedDataObject(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final DataObject dataObject
     ) throws SQLException, JsonProcessingException;
 
     public abstract void internalSavePreparedDataObjects(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull Iterable<DataObject> dataObjects
     ) throws SQLException, JsonProcessingException;
 
     public abstract void internalSavePreparedDataPackage(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull DataPackage<?> dataPackage
     ) throws SQLException, JsonProcessingException;
 
     public abstract void internalSavePreparedDataPackages(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull Iterable<DataPackage<?>> dataPackages
     ) throws SQLException, JsonProcessingException;
 
     protected abstract void executeStatement(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final Object data
     ) throws SQLException;
 }

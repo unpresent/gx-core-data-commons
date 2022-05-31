@@ -6,6 +6,7 @@ import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import ru.gx.core.data.DataObject;
 import ru.gx.core.data.DataPackage;
+import ru.gx.core.data.sqlwrapping.SqlCommandWrapper;
 import ru.gx.core.messaging.Message;
 
 import java.sql.SQLException;
@@ -22,7 +23,7 @@ public abstract class AbstractJsonDbSavingOperator
 
     @Override
     protected void internalSavePreparedMessage(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final Message<?> message
     ) throws SQLException, JsonProcessingException {
         final var data = getObjectMapper().writeValueAsString(message);
@@ -31,7 +32,7 @@ public abstract class AbstractJsonDbSavingOperator
 
     @Override
     protected void internalSavePreparedMessages(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final Iterable<Message<?>> messages
     ) throws SQLException, JsonProcessingException {
         final var data = getObjectMapper().writeValueAsString(messages);
@@ -40,7 +41,7 @@ public abstract class AbstractJsonDbSavingOperator
 
     @Override
     protected void internalSavePreparedDataObject(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final DataObject dataObject
     ) throws SQLException, JsonProcessingException {
         final var data = getObjectMapper().writeValueAsString(dataObject);
@@ -49,7 +50,7 @@ public abstract class AbstractJsonDbSavingOperator
 
     @Override
     public void internalSavePreparedDataObjects(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull Iterable<DataObject> dataObjects
     ) throws SQLException, JsonProcessingException {
         final var data = getObjectMapper().writeValueAsString(dataObjects);
@@ -58,7 +59,7 @@ public abstract class AbstractJsonDbSavingOperator
 
     @Override
     public void internalSavePreparedDataPackage(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull DataPackage<?> dataPackage
     ) throws SQLException, JsonProcessingException {
         final var data = getObjectMapper().writeValueAsString(dataPackage);
@@ -67,7 +68,7 @@ public abstract class AbstractJsonDbSavingOperator
 
     @Override
     public void internalSavePreparedDataPackages(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull Iterable<DataPackage<?>> dataPackages
     ) throws SQLException, JsonProcessingException {
         final var data = getObjectMapper().writeValueAsString(dataPackages);

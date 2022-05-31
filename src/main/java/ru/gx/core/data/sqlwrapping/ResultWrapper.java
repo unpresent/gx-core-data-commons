@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 
+@SuppressWarnings("unused")
 public interface ResultWrapper {
     @NotNull
     Object getInternalData();

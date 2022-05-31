@@ -1,6 +1,7 @@
 package ru.gx.core.data.sqlwrapping;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 import java.sql.SQLException;
@@ -21,4 +22,6 @@ public interface ConnectionWrapper extends Closeable {
     void commitTransaction() throws SQLException;
 
     void rollbackTransaction() throws SQLException;
+
+    boolean isEqual(@Nullable final ConnectionWrapper connectionWrapper);
 }

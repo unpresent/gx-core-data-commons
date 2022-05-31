@@ -11,6 +11,7 @@ import ru.gx.core.channels.ChannelApiDescriptor;
 import ru.gx.core.channels.ChannelConfigurationException;
 import ru.gx.core.data.DataObject;
 import ru.gx.core.data.DataPackage;
+import ru.gx.core.data.sqlwrapping.SqlCommandWrapper;
 import ru.gx.core.messaging.Message;
 import ru.gx.core.messaging.MessageBody;
 import ru.gx.core.messaging.MessageSimpleBody;
@@ -165,7 +166,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
 
     @Getter(PROTECTED)
     @Nullable
-    private Object saveStatement;
+    private SqlCommandWrapper saveStatement;
 
     /**
      * Событие, которые вызывается сразу после сохранения данных в БД.
@@ -710,7 +711,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
             final var accumulateMode = getAccumulateMode();
 
             try (final var connect = getOwner().getThreadConnectionsWrapper().getCurrentThreadConnection()) {
-                if (getSaveStatement() == null) {
+                if (getSaveStatement() == null || !getSaveStatement().getConnection().isEqual(connect)) {
                     this.saveStatement = vSaveOperator.prepareStatement(getSaveCommand(), accumulateMode);
                 }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jetbrains.annotations.NotNull;
 import ru.gx.core.data.DataObject;
 import ru.gx.core.data.DataPackage;
+import ru.gx.core.data.sqlwrapping.SqlCommandWrapper;
 
 import javax.activation.UnsupportedDataTypeException;
 import java.sql.SQLException;
@@ -22,7 +23,7 @@ public interface DbSavingOperator {
      * @throws SQLException ошибка при работе с БД
      */
     @NotNull
-    Object prepareStatement(
+    SqlCommandWrapper prepareStatement(
             @NotNull final String sqlCommand,
             @NotNull final DbSavingAccumulateMode accumulateMode
     ) throws SQLException;
@@ -42,7 +43,7 @@ public interface DbSavingOperator {
      * @throws SQLException ошибка при работе с БД
      */
     void saveData(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final Object data,
             @NotNull final DbSavingAccumulateMode accumulateMode
     ) throws SQLException, UnsupportedDataTypeException, JsonProcessingException;

@@ -7,6 +7,7 @@ import java.io.Closeable;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 
+@SuppressWarnings("unused")
 public interface SqlCommandWrapper extends Closeable {
     @NotNull
     Object getInternalCommand();
@@ -20,4 +21,6 @@ public interface SqlCommandWrapper extends Closeable {
     void executeNoResult() throws SQLException;
 
     ResultWrapper executeWithResult() throws SQLException;
+
+    ConnectionWrapper getConnection();
 }
