@@ -712,6 +712,12 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
 
             try (final var connect = getOwner().getThreadConnectionsWrapper().getCurrentThreadConnection()) {
                 if (getSaveStatement() == null || !getSaveStatement().getConnection().isEqual(connect)) {
+                    if (getSaveStatement() != null) {
+                        final var connection = getSaveStatement().getConnection();
+                        if (connection != null) {
+                            connection.close();
+                        }
+                    }
                     this.saveStatement = vSaveOperator.prepareStatement(getSaveCommand(), accumulateMode);
                 }
 
