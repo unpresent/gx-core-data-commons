@@ -46,7 +46,7 @@ public abstract class AbstractDbSavingConfiguration
     // -------------------------------------------------------------------------------------------------------------
     // <editor-fold desc="Реализация OutcomeTopicsConfiguration">
     @Override
-    protected <M extends Message<? extends MessageBody>, D extends ChannelHandlerDescriptor<M>>
+    protected <M extends Message<? extends MessageBody>, D extends ChannelHandlerDescriptor>
     boolean allowCreateDescriptor(@NotNull Class<D> descriptorClass) {
         return DbSavingDescriptor.class.isAssignableFrom(descriptorClass);
     }

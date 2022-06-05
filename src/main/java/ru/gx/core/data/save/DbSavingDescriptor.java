@@ -32,14 +32,14 @@ import static lombok.AccessLevel.PROTECTED;
 @EqualsAndHashCode(callSuper = false)
 @ToString
 @Slf4j
-public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
-        extends AbstractOutcomeChannelHandlerDescriptor<M> {
+public class DbSavingDescriptor
+        extends AbstractOutcomeChannelHandlerDescriptor {
     // -----------------------------------------------------------------------------------------------------------------
     // <editor-fold desc="Fields">
 
     @Getter
     @NotNull
-    private final Class<M> messageClass;
+    private final Class<? extends Message<? extends MessageBody>> messageClass;
 
     /**
      * Класс объектов сохраняемых данных
@@ -144,7 +144,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
      * Буфер сообщений
      */
     @Getter(PROTECTED)
-    private final List<M> messages = new ArrayList<>();
+    private final List<Message<? extends MessageBody>> messages = new ArrayList<>();
 
     /**
      * Буфер объектов
@@ -188,7 +188,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
     // <editor-fold desc="Initialize">
     public DbSavingDescriptor(
             @NotNull final AbstractDbSavingConfiguration owner,
-            @NotNull final ChannelApiDescriptor<M> api,
+            @NotNull final ChannelApiDescriptor<? extends Message<? extends MessageBody>> api,
             @Nullable final DbSavingDescriptorsDefaults defaults
     ) {
         super(owner, api, defaults);
@@ -219,7 +219,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
      */
     @Override
     @NotNull
-    public DbSavingDescriptor<M> init() throws InvalidParameterException {
+    public DbSavingDescriptor init() throws InvalidParameterException {
         final var descriptorName = getMessageClass().getName();
 
         if (this.saveCommand == null) {
@@ -267,7 +267,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
     }
 
     @NotNull
-    public DbSavingDescriptor<M> unInit() {
+    public DbSavingDescriptor unInit() {
         super.unInit();
         return this;
     }
@@ -295,7 +295,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
      * @return this
      */
     @NotNull
-    public DbSavingDescriptor<M> setDataObjectClass(@NotNull final Class<? extends DataObject> dataObjectClass) {
+    public DbSavingDescriptor setDataObjectClass(@NotNull final Class<? extends DataObject> dataObjectClass) {
         if (dataObjectClass.equals(this.dataObjectClass)) {
             return this;
         }
@@ -311,7 +311,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
      * @return this
      */
     @NotNull
-    public DbSavingDescriptor<M> setDataPackageClass(
+    public DbSavingDescriptor setDataPackageClass(
             @NotNull final Class<? extends DataPackage<? extends DataObject>> dataPackageClass
     ) {
         if (dataPackageClass.equals(this.dataPackageClass)) {
@@ -329,7 +329,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
      * @return this
      */
     @NotNull
-    public DbSavingDescriptor<M> setMessagesFactory(
+    public DbSavingDescriptor setMessagesFactory(
             @NotNull final MessagesFactory messagesFactory
     ) {
         if (messagesFactory.equals(this.messagesFactory)) {
@@ -347,7 +347,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
      * @return this
      */
     @NotNull
-    public DbSavingDescriptor<M> setSaveOperator(@NotNull final DbSavingOperator saveOperator) {
+    public DbSavingDescriptor setSaveOperator(@NotNull final DbSavingOperator saveOperator) {
         if (saveOperator.equals(this.saveOperator)) {
             return this;
         }
@@ -363,7 +363,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
      * @return this
      */
     @NotNull
-    public DbSavingDescriptor<M> setSaveCommand(@NotNull final String saveCommand) {
+    public DbSavingDescriptor setSaveCommand(@NotNull final String saveCommand) {
         if (saveCommand.equals(this.saveCommand)) {
             return this;
         }
@@ -379,7 +379,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
      * @return this
      */
     @NotNull
-    public DbSavingDescriptor<M> setProcessMode(@NotNull final DbSavingProcessMode processMode) {
+    public DbSavingDescriptor setProcessMode(@NotNull final DbSavingProcessMode processMode) {
         if (this.processMode == processMode) {
             return this;
         }
@@ -395,7 +395,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
      * @return this
      */
     @NotNull
-    public DbSavingDescriptor<M> setSerializeMode(DbSavingSerializeMode serializeMode) {
+    public DbSavingDescriptor setSerializeMode(DbSavingSerializeMode serializeMode) {
         if (this.serializeMode == serializeMode) {
             return this;
         }
@@ -411,7 +411,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
      * @return this
      */
     @NotNull
-    public DbSavingDescriptor<M> setAccumulateMode(DbSavingAccumulateMode accumulateMode) {
+    public DbSavingDescriptor setAccumulateMode(DbSavingAccumulateMode accumulateMode) {
         if (this.accumulateMode == accumulateMode) {
             return this;
         }
@@ -427,7 +427,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
      * @return this
      */
     @NotNull
-    public DbSavingDescriptor<M> setUseTransactionDueSave(boolean useTransactionDueSave) {
+    public DbSavingDescriptor setUseTransactionDueSave(boolean useTransactionDueSave) {
         if (this.useTransactionDueSave == useTransactionDueSave) {
             return this;
         }
@@ -475,7 +475,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
      */
     @SuppressWarnings("unchecked")
     public void processMessage(
-            @NotNull final M message,
+            @NotNull final Message<? extends MessageBody> message,
             @Nullable final ApplicationEvent eventAfterSave
     ) throws SQLException, IOException {
         switch (getAccumulateMode()) {
@@ -527,7 +527,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
         checkNeedToSave();
     }
 
-    protected Object internalExtractData(@NotNull M message) {
+    protected Object internalExtractData(@NotNull Message<? extends MessageBody> message) {
         final var body = message.getBody();
         if (!(body instanceof final MessageSimpleBody simpleBody)) {
             throw new UnsupportedOperationException("Unsupported accumulateMode "
@@ -632,7 +632,6 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
     }
 
     @SneakyThrows({InvocationTargetException.class, InstantiationException.class, IllegalAccessException.class})
-    @SuppressWarnings("unchecked")
     protected void internalCreateAndAddMessageByDataObject(@NotNull final DataObject dataObject) {
         final var descriptorName = getMessageClass().getName();
         if (!isInitialized()
@@ -642,8 +641,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
                     + " is not initialized!");
         }
 
-        final var result = (M)
-                getMessagesFactory()
+        final var result = getMessagesFactory()
                         .createByDataObject(
                                 null,   // parentId
                                 getMessageType(),
@@ -654,7 +652,6 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
     }
 
     @SneakyThrows({InvocationTargetException.class, InstantiationException.class, IllegalAccessException.class})
-    @SuppressWarnings("unchecked")
     protected void internalCreateAndAddMessageByDataPackage(
             @NotNull final DataPackage<? extends DataObject> dataPackage
     ) {
@@ -666,8 +663,7 @@ public class DbSavingDescriptor<M extends Message<? extends MessageBody>>
                     + " is not initialized!");
         }
 
-        final var result = (M)
-                getMessagesFactory()
+        final var result = getMessagesFactory()
                         .createByDataPackage(
                                 null,   // parentId
                                 getMessageType(),

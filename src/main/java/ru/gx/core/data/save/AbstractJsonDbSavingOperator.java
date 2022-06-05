@@ -11,6 +11,7 @@ import ru.gx.core.messaging.Message;
 
 import java.sql.SQLException;
 
+@SuppressWarnings("unused")
 @Accessors(chain = true)
 public abstract class AbstractJsonDbSavingOperator
         extends AbstractDbSavingOperator {

@@ -41,7 +41,7 @@ public abstract class AbstractDbSaver {
             throws SQLException, IOException {
         for (final var config : getConfigurations()) {
             for (final var descriptor : config.getAll()) {
-                final var savingDescriptor = (DbSavingDescriptor<?>)descriptor;
+                final var savingDescriptor = (DbSavingDescriptor)descriptor;
                 if (savingDescriptor.getProcessMode() == DbSavingProcessMode.UseBuffer) {
                     savingDescriptor.checkNeedToSave();
                 }
