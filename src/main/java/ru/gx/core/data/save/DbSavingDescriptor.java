@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationEvent;
 import ru.gx.core.channels.AbstractOutcomeChannelHandlerDescriptor;
 import ru.gx.core.channels.ChannelApiDescriptor;
 import ru.gx.core.channels.ChannelConfigurationException;
+import ru.gx.core.channels.OutcomeChannelDescriptorsDefaults;
 import ru.gx.core.data.DataObject;
 import ru.gx.core.data.DataPackage;
 import ru.gx.core.data.sqlwrapping.SqlCommandWrapper;
@@ -32,8 +33,7 @@ import static lombok.AccessLevel.PROTECTED;
 @EqualsAndHashCode(callSuper = false)
 @ToString
 @Slf4j
-public class DbSavingDescriptor
-        extends AbstractOutcomeChannelHandlerDescriptor {
+public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor {
     // -----------------------------------------------------------------------------------------------------------------
     // <editor-fold desc="Fields">
 
@@ -84,7 +84,7 @@ public class DbSavingDescriptor
      */
     @Getter
     @NotNull
-    private DbSavingProcessMode processMode;
+    private DbSavingProcessMode processMode = DbSavingDescriptorsDefaults.DEFAULT_PROCESS_MODE;
 
     /**
      * Способ представления данных при сериализации (отправке данных в БД)
@@ -95,7 +95,7 @@ public class DbSavingDescriptor
      */
     @Getter
     @NotNull
-    private DbSavingSerializeMode serializeMode;
+    private DbSavingSerializeMode serializeMode = DbSavingDescriptorsDefaults.DEFAULT_SERIALIZE_MODE;
 
     /**
      * Режим накопления и отправки данных в БД
@@ -110,21 +110,21 @@ public class DbSavingDescriptor
      */
     @Getter
     @NotNull
-    private DbSavingAccumulateMode accumulateMode;
+    private DbSavingAccumulateMode accumulateMode = DbSavingDescriptorsDefaults.DEFAULT_ACCUMULATE_MODE;
 
     /**
      * Максимальный размер буфера, по достижении которого данные будут сохранены в БД.
      */
     @Getter
     @Setter
-    private int bufferLimit;
+    private int bufferLimit = DbSavingDescriptorsDefaults.DEFAULTS_BUFFER_LIMIT;
 
     /**
      * Максимальное время (в мс), в течение которого требуется копить данные, после этого данные будут сохранены в БД.
      */
     @Getter
     @Setter
-    private int bufferForMs;
+    private int bufferForMs = DbSavingDescriptorsDefaults.DEFAULTS_BUFFER_FOR_MS;
 
     /**
      * Реализация метода сохранения в БД
@@ -181,35 +181,32 @@ public class DbSavingDescriptor
      * а закрывается после обработки события о сохранении данных.
      */
     @Getter(PROTECTED)
-    private boolean useTransactionDueSave;
+    private boolean useTransactionDueSave = DbSavingDescriptorsDefaults.DEFAULT_USE_TRAN_IN_SAVE;
 
     // </editor-fold>
     // -----------------------------------------------------------------------------------------------------------------
     // <editor-fold desc="Initialize">
-    public DbSavingDescriptor(
+    protected DbSavingDescriptor(
             @NotNull final AbstractDbSavingConfiguration owner,
             @NotNull final ChannelApiDescriptor<? extends Message<? extends MessageBody>> api,
             @Nullable final DbSavingDescriptorsDefaults defaults
     ) {
         super(owner, api, defaults);
-        if (defaults != null) {
-            this.processMode = defaults.getProcessMode();
-            this.accumulateMode = defaults.getAccumulateMode();
-            this.serializeMode = defaults.getSerializeMode();
-            this.bufferLimit = defaults.getBufferLimit();
-            this.bufferForMs = defaults.getBufferForMs();
-            this.saveOperator = defaults.getSaveOperator();
-            this.useTransactionDueSave = defaults.isUseTransactionDueSave();
-        } else {
-            this.processMode = DbSavingDescriptorsDefaults.DEFAULT_PROCESS_MODE;
-            this.accumulateMode = DbSavingDescriptorsDefaults.DEFAULT_ACCUMULATE_MODE;
-            this.serializeMode = DbSavingDescriptorsDefaults.DEFAULT_SERIALIZE_MODE;
-            this.bufferLimit = DbSavingDescriptorsDefaults.DEFAULTS_BUFFER_LIMIT;
-            this.bufferForMs = DbSavingDescriptorsDefaults.DEFAULTS_BUFFER_FOR_MS;
-            this.useTransactionDueSave = DbSavingDescriptorsDefaults.DEFAULT_USE_TRAN_IN_SAVE;
-        }
-
         this.messageClass = api.getMessageClass();
+    }
+
+    @Override
+    protected void internalInitDefaults(@Nullable final OutcomeChannelDescriptorsDefaults defaults) {
+        super.internalInitDefaults(defaults);
+        if (defaults instanceof final DbSavingDescriptorsDefaults dbSavingDefaults) {
+            this.processMode = dbSavingDefaults.getProcessMode();
+            this.accumulateMode = dbSavingDefaults.getAccumulateMode();
+            this.serializeMode = dbSavingDefaults.getSerializeMode();
+            this.bufferLimit = dbSavingDefaults.getBufferLimit();
+            this.bufferForMs = dbSavingDefaults.getBufferForMs();
+            this.saveOperator = dbSavingDefaults.getSaveOperator();
+            this.useTransactionDueSave = dbSavingDefaults.isUseTransactionDueSave();
+        }
     }
 
     /**
@@ -642,12 +639,12 @@ public class DbSavingDescriptor
         }
 
         final var result = getMessagesFactory()
-                        .createByDataObject(
-                                null,   // parentId
-                                getMessageType(),
-                                getMessageVersion(),
-                                dataObject,
-                                null);
+                .createByDataObject(
+                        null,   // parentId
+                        getMessageType(),
+                        getMessageVersion(),
+                        dataObject,
+                        null);
         getMessages().add(result);
     }
 
@@ -664,12 +661,12 @@ public class DbSavingDescriptor
         }
 
         final var result = getMessagesFactory()
-                        .createByDataPackage(
-                                null,   // parentId
-                                getMessageType(),
-                                getMessageVersion(),
-                                dataPackage,
-                                null);
+                .createByDataPackage(
+                        null,   // parentId
+                        getMessageType(),
+                        getMessageVersion(),
+                        dataPackage,
+                        null);
         getMessages().add(result);
     }
 

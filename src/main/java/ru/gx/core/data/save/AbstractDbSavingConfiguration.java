@@ -8,8 +8,6 @@ import ru.gx.core.channels.AbstractChannelsConfiguration;
 import ru.gx.core.channels.ChannelDirection;
 import ru.gx.core.channels.ChannelHandlerDescriptor;
 import ru.gx.core.data.sqlwrapping.ThreadConnectionsWrapper;
-import ru.gx.core.messaging.Message;
-import ru.gx.core.messaging.MessageBody;
 
 /**
  * Базовый класс для конфигураций сохранения потоков в БД.
@@ -46,7 +44,7 @@ public abstract class AbstractDbSavingConfiguration
     // -------------------------------------------------------------------------------------------------------------
     // <editor-fold desc="Реализация OutcomeTopicsConfiguration">
     @Override
-    protected <M extends Message<? extends MessageBody>, D extends ChannelHandlerDescriptor>
+    protected <D extends ChannelHandlerDescriptor>
     boolean allowCreateDescriptor(@NotNull Class<D> descriptorClass) {
         return DbSavingDescriptor.class.isAssignableFrom(descriptorClass);
     }
