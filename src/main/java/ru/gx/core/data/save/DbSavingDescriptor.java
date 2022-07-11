@@ -38,7 +38,7 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
     // <editor-fold desc="Fields">
 
     @Getter
-    @NotNull
+    @Nullable
     private final Class<? extends Message<? extends MessageBody>> messageClass;
 
     /**
@@ -186,13 +186,22 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
     // </editor-fold>
     // -----------------------------------------------------------------------------------------------------------------
     // <editor-fold desc="Initialize">
-    protected DbSavingDescriptor(
+    public DbSavingDescriptor(
             @NotNull final AbstractDbSavingConfiguration owner,
             @NotNull final ChannelApiDescriptor<? extends Message<? extends MessageBody>> api,
             @Nullable final DbSavingDescriptorsDefaults defaults
     ) {
         super(owner, api, defaults);
         this.messageClass = api.getMessageClass();
+    }
+
+    public DbSavingDescriptor(
+            @NotNull final AbstractDbSavingConfiguration owner,
+            @NotNull final String channelName,
+            @Nullable final DbSavingDescriptorsDefaults defaults
+    ) {
+        super(owner, channelName, defaults);
+        this.messageClass = null;
     }
 
     @Override
@@ -217,16 +226,14 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
     @Override
     @NotNull
     public DbSavingDescriptor init() throws InvalidParameterException {
-        final var descriptorName = getMessageClass().getName();
+        final var descriptorName = getChannelName();
 
         if (this.saveCommand == null) {
-            throw new ChannelConfigurationException("Descriptor for saving messages "
-                    + descriptorName + " doesn't have saveCommand!");
+            throw new ChannelConfigurationException("Descriptor " + descriptorName + " doesn't have saveCommand!");
         }
 
         if (this.saveOperator == null) {
-            throw new ChannelConfigurationException("Descriptor for saving messages "
-                    + descriptorName + " doesn't have operator!");
+            throw new ChannelConfigurationException("Descriptor " + descriptorName + " doesn't have operator!");
         }
 
         if (this.dataObjectClass == null
@@ -234,9 +241,8 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
                 getAccumulateMode() == DbSavingAccumulateMode.PerObject
                         || getAccumulateMode() == DbSavingAccumulateMode.ListOfObjects)
         ) {
-            throw new ChannelConfigurationException("Descriptor for saving messages "
-                    + descriptorName
-                    + " doesn't have dataObjectClass (for accumulateMode = " + getAccumulateMode() + ")!");
+            throw new ChannelConfigurationException("Descriptor " + descriptorName +
+                    " doesn't have dataObjectClass (for accumulateMode = " + getAccumulateMode() + ")!");
         }
 
         if (this.dataPackageClass == null
@@ -279,7 +285,7 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
     }
 
     protected void checkMutable(@NotNull final String propertyName) {
-        final var descriptorName = this.messageClass.getName();
+        final var descriptorName = getChannelName();
         if (isInitialized()) {
             throw new ChannelConfigurationException("Descriptor for saving of " + descriptorName + " can't change property " + propertyName + " after initialization!");
         }
@@ -529,7 +535,7 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
         if (!(body instanceof final MessageSimpleBody simpleBody)) {
             throw new UnsupportedOperationException("Unsupported accumulateMode "
                     + getAccumulateMode()
-                    + " for messages " + getMessageClass().getName());
+                    + " for channel " + getChannelName());
         }
         final var data = simpleBody.getData();
         if (data == null) {
@@ -630,12 +636,10 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
 
     @SneakyThrows({InvocationTargetException.class, InstantiationException.class, IllegalAccessException.class})
     protected void internalCreateAndAddMessageByDataObject(@NotNull final DataObject dataObject) {
-        final var descriptorName = getMessageClass().getName();
+        final var descriptorName = getChannelName();
         if (!isInitialized()
                 || getMessagesFactory() == null || getMessageType() == null || getMessageVersion() == null) {
-            throw new ChannelConfigurationException("Descriptor for saving of "
-                    + descriptorName
-                    + " is not initialized!");
+            throw new ChannelConfigurationException("Descriptor " + descriptorName + " is not initialized!");
         }
 
         final var result = getMessagesFactory()
@@ -652,12 +656,10 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
     protected void internalCreateAndAddMessageByDataPackage(
             @NotNull final DataPackage<? extends DataObject> dataPackage
     ) {
-        final var descriptorName = getMessageClass().getName();
+        final var descriptorName = getChannelName();
         if (!isInitialized()
                 || getMessagesFactory() == null || getMessageType() == null || getMessageVersion() == null) {
-            throw new ChannelConfigurationException("Descriptor for saving of "
-                    + descriptorName
-                    + " is not initialized!");
+            throw new ChannelConfigurationException("Descriptor " + descriptorName + " is not initialized!");
         }
 
         final var result = getMessagesFactory()
@@ -674,7 +676,7 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
     @SneakyThrows
     @NotNull
     protected DataPackage<DataObject> internalCreateAndAddDataPackage() {
-        final var descriptorName = getMessageClass().getName();
+        final var descriptorName = getChannelName();
         if (!isInitialized() || getDataPackageClass() == null) {
             throw new ChannelConfigurationException("Descriptor for saving of "
                     + descriptorName
@@ -688,15 +690,15 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
 
     protected synchronized void internalSaveData()
             throws SQLException, IOException {
-        final var descriptorName = getMessageClass().getName();
+        final var descriptorName = getChannelName();
         if (!isInitialized()) {
-            throw new ChannelConfigurationException("Descriptor for saving of " + descriptorName + " is not initialized!");
+            throw new ChannelConfigurationException("Descriptor " + descriptorName + " is not initialized!");
         }
         if (getSaveCommand() == null) {
-            throw new ChannelConfigurationException("Descriptor for saving of " + descriptorName + " is not configured (does not defined saveCommand)!");
+            throw new ChannelConfigurationException("Descriptor " + descriptorName + " is not configured (does not defined saveCommand)!");
         }
         if (getSaveOperator() == null) {
-            throw new ChannelConfigurationException("Descriptor for saving of " + descriptorName + " is not configured (does not defined saveOperator)!");
+            throw new ChannelConfigurationException("Descriptor " + descriptorName + " is not configured (does not defined saveOperator)!");
         }
 
         try {
