@@ -9,7 +9,6 @@ import org.springframework.context.ApplicationEvent;
 import ru.gx.core.channels.AbstractOutcomeChannelHandlerDescriptor;
 import ru.gx.core.channels.ChannelApiDescriptor;
 import ru.gx.core.channels.ChannelConfigurationException;
-import ru.gx.core.channels.OutcomeChannelDescriptorsDefaults;
 import ru.gx.core.data.DataObject;
 import ru.gx.core.data.DataPackage;
 import ru.gx.core.data.sqlwrapping.SqlCommandWrapper;
