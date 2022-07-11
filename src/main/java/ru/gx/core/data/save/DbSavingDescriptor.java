@@ -193,6 +193,7 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
     ) {
         super(owner, api, defaults);
         this.messageClass = api.getMessageClass();
+        internalInitDefaults(defaults);
     }
 
     public DbSavingDescriptor(
@@ -202,19 +203,18 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
     ) {
         super(owner, channelName, defaults);
         this.messageClass = null;
+        internalInitDefaults(defaults);
     }
 
-    @Override
-    protected void internalInitDefaults(@Nullable final OutcomeChannelDescriptorsDefaults defaults) {
-        super.internalInitDefaults(defaults);
-        if (defaults instanceof final DbSavingDescriptorsDefaults dbSavingDefaults) {
-            this.processMode = dbSavingDefaults.getProcessMode();
-            this.accumulateMode = dbSavingDefaults.getAccumulateMode();
-            this.serializeMode = dbSavingDefaults.getSerializeMode();
-            this.bufferLimit = dbSavingDefaults.getBufferLimit();
-            this.bufferForMs = dbSavingDefaults.getBufferForMs();
-            this.saveOperator = dbSavingDefaults.getSaveOperator();
-            this.useTransactionDueSave = dbSavingDefaults.isUseTransactionDueSave();
+    private void internalInitDefaults(@Nullable final DbSavingDescriptorsDefaults defaults) {
+        if (defaults != null) {
+            this.processMode = defaults.getProcessMode();
+            this.accumulateMode = defaults.getAccumulateMode();
+            this.serializeMode = defaults.getSerializeMode();
+            this.bufferLimit = defaults.getBufferLimit();
+            this.bufferForMs = defaults.getBufferForMs();
+            this.saveOperator = defaults.getSaveOperator();
+            this.useTransactionDueSave = defaults.isUseTransactionDueSave();
         }
     }
 
