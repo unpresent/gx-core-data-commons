@@ -11,6 +11,7 @@ import ru.gx.core.channels.ChannelApiDescriptor;
 import ru.gx.core.channels.ChannelConfigurationException;
 import ru.gx.core.data.DataObject;
 import ru.gx.core.data.DataPackage;
+import ru.gx.core.data.errors.BufferIsFullException;
 import ru.gx.core.data.sqlwrapping.SqlCommandWrapper;
 import ru.gx.core.messaging.Message;
 import ru.gx.core.messaging.MessageBody;
@@ -115,8 +116,10 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
      * Максимальный размер буфера, по достижении которого данные будут сохранены в БД.
      */
     @Getter
-    @Setter
     private int bufferLimit = DbSavingDescriptorsDefaults.DEFAULTS_BUFFER_LIMIT;
+
+    @Getter
+    private int allowableBufferOversize = (int)(DbSavingDescriptorsDefaults.DEFAULTS_BUFFER_LIMIT * 0.1) + 1;
 
     /**
      * Максимальное время (в мс), в течение которого требуется копить данные, после этого данные будут сохранены в БД.
@@ -277,6 +280,14 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
     // </editor-fold>
     // -----------------------------------------------------------------------------------------------------------------
     // <editor-fold desc="Additional getters & setters">
+    @NotNull
+    public DbSavingDescriptor setBufferLimit(final int value)
+    {
+        this.bufferLimit = value;
+        this.allowableBufferOversize = (int)(DbSavingDescriptorsDefaults.DEFAULTS_BUFFER_LIMIT * 0.1) + 1;
+        return this;
+    }
+
     @Override
     @NotNull
     public AbstractDbSavingConfiguration getOwner() {
@@ -442,7 +453,15 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
     // -----------------------------------------------------------------------------------------------------------------
     // <editor-fold desc="Saving realization">
     public boolean bufferIsEmpty() {
-        return getObjects().isEmpty();
+        return getBuffer().isEmpty();
+    }
+
+    protected List<?> getBuffer() {
+        return switch (getAccumulateMode()) {
+            case PerMessage, ListOfMessages -> getMessages();
+            case PerObject, ListOfObjects -> getObjects();
+            case PerPackage, ListOfPackages -> getPackages();
+        };
     }
 
     /**
@@ -453,14 +472,9 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
             return true;
         }
 
-        final var collection = switch (getAccumulateMode()) {
-            case PerMessage, ListOfMessages -> getMessages();
-            case PerObject, ListOfObjects -> getObjects();
-            case PerPackage, ListOfPackages -> getPackages();
-        };
-
-        return collection.size() >= getBufferLimit()
-                || (getBufferForMs() > 0 && getLastSavedIntervalMs() > getBufferForMs() && !collection.isEmpty());
+        final var buffer = getBuffer();
+        return buffer.size() >= getBufferLimit()
+                || (getBufferForMs() > 0 && getLastSavedIntervalMs() > getBufferForMs() && !buffer.isEmpty());
     }
 
     /**
@@ -484,12 +498,16 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
             case PerMessage, ListOfMessages -> {
                 if (getMessages().isEmpty()) {
                     resetBuffer();
+                } else {
+                    checkBufferIsFull();
                 }
                 getMessages().add(message);
             }
             case PerObject, ListOfObjects -> {
                 if (getObjects().isEmpty()) {
                     resetBuffer();
+                } else {
+                    checkBufferIsFull();
                 }
                 final var data = internalExtractData(message);
                 if (data instanceof final DataObject dataObject) {
@@ -505,6 +523,8 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
             case PerPackage, ListOfPackages -> {
                 if (getPackages().isEmpty()) {
                     resetBuffer();
+                } else {
+                    checkBufferIsFull();
                 }
                 final var packs = getPackages();
                 final var lastPackage = packs.isEmpty()
@@ -558,18 +578,24 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
             case PerMessage, ListOfMessages -> {
                 if (getMessages().isEmpty()) {
                     resetBuffer();
+                } else {
+                    checkBufferIsFull();
                 }
                 internalCreateAndAddMessageByDataObject(dataObject);
             }
             case PerObject, ListOfObjects -> {
                 if (getObjects().isEmpty()) {
                     resetBuffer();
+                } else {
+                    checkBufferIsFull();
                 }
                 getObjects().add(dataObject);
             }
             case PerPackage, ListOfPackages -> {
                 if (getPackages().isEmpty()) {
                     resetBuffer();
+                } else {
+                    checkBufferIsFull();
                 }
                 final var packs = getPackages();
                 final var lastPackage = packs.isEmpty()
@@ -597,12 +623,16 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
             case PerMessage, ListOfMessages -> {
                 if (getMessages().isEmpty()) {
                     resetBuffer();
+                } else {
+                    checkBufferIsFull();
                 }
                 internalCreateAndAddMessageByDataPackage(dataPackage);
             }
             case PerObject, ListOfObjects -> {
                 if (getObjects().isEmpty()) {
                     resetBuffer();
+                } else {
+                    checkBufferIsFull();
                 }
                 dataPackage
                         .getObjects()
@@ -611,6 +641,8 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
             case PerPackage, ListOfPackages -> {
                 if (getPackages().isEmpty()) {
                     resetBuffer();
+                } else {
+                    checkBufferIsFull();
                 }
                 getPackages().add(dataPackage);
             }
@@ -623,6 +655,19 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
     public synchronized void checkNeedToSave() throws SQLException, IOException {
         if (isInitialized() && readyForSave()) {
             internalSaveData();
+        }
+    }
+
+    protected synchronized void checkBufferIsFull() {
+        final var buffer = getBuffer();
+        final var bufferSize = buffer.size();
+        if (bufferSize <= getBufferLimit()) {
+            return;
+        }
+        if (bufferSize + getAllowableBufferOversize() > getBufferLimit()) {
+            throw new BufferIsFullException(
+                    "DbSavingDescriptor (" + getChannelName()
+                            + ") Buffer is full (size = " + bufferSize + "; limit = " + getBufferLimit() + ")");
         }
     }
 
@@ -700,24 +745,24 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
             throw new ChannelConfigurationException("Descriptor " + descriptorName + " is not configured (does not defined saveOperator)!");
         }
 
-        try {
-            final var vSaveOperator = getSaveOperator();
-            final var accumulateMode = getAccumulateMode();
+        final var vSaveOperator = getSaveOperator();
+        final var accumulateMode = getAccumulateMode();
 
-            try (final var connect = getOwner().getThreadConnectionsWrapper().getCurrentThreadConnection()) {
-                if (getSaveStatement() == null || !getSaveStatement().getConnection().isEqual(connect)) {
-                    if (getSaveStatement() != null) {
-                        final var connection = getSaveStatement().getConnection();
-                        if (connection != null) {
-                            connection.close();
-                        }
+        try (final var connect = getOwner().getThreadConnectionsWrapper().getCurrentThreadConnection()) {
+            if (getSaveStatement() == null || !getSaveStatement().getConnection().isEqual(connect)) {
+                if (getSaveStatement() != null) {
+                    final var connection = getSaveStatement().getConnection();
+                    if (connection != null) {
+                        connection.close();
                     }
-                    this.saveStatement = vSaveOperator.prepareStatement(getSaveCommand(), accumulateMode);
                 }
+                this.saveStatement = vSaveOperator.prepareStatement(getSaveCommand(), accumulateMode);
+            }
 
-                if (isUseTransactionDueSave()) {
-                    connect.openTransaction();
-                }
+            if (isUseTransactionDueSave()) {
+                connect.openTransaction();
+            }
+            try {
                 try {
                     switch (accumulateMode) {
                         case PerMessage, ListOfMessages -> vSaveOperator.saveData(getSaveStatement(), getMessages(), accumulateMode);
@@ -733,16 +778,17 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
                     if (isUseTransactionDueSave()) {
                         connect.commitTransaction();
                     }
-                } catch (Exception e) {
-                    log.error("", e);
-                    if (isUseTransactionDueSave()) {
-                        connect.rollbackTransaction();
-                        throw e;
-                    }
+
+                } finally {
+                    resetBuffer();
+                }
+            } catch (Exception e) {
+                log.error("", e);
+                if (isUseTransactionDueSave()) {
+                    connect.rollbackTransaction();
+                    throw e;
                 }
             }
-        } finally {
-            resetBuffer();
         }
     }
     // </editor-fold>
