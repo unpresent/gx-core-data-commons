@@ -745,48 +745,53 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
             throw new ChannelConfigurationException("Descriptor " + descriptorName + " is not configured (does not defined saveOperator)!");
         }
 
-        final var vSaveOperator = getSaveOperator();
-        final var accumulateMode = getAccumulateMode();
+        // Если пришли сюда процедуру из таймеров разных Descriptor-ов, то
+        // физическое само сохранение выполняем через блокировку одного общего ресурса,
+        // чтобы не использовать несколько коннектов пула.
+        synchronized (getOwner()) {
+            final var vSaveOperator = getSaveOperator();
+            final var accumulateMode = getAccumulateMode();
 
-        try (final var connect = getOwner().getThreadConnectionsWrapper().getCurrentThreadConnection()) {
-            if (getSaveStatement() == null || !getSaveStatement().getConnection().isEqual(connect)) {
-                if (getSaveStatement() != null) {
-                    final var connection = getSaveStatement().getConnection();
-                    if (connection != null) {
-                        connection.close();
+            try (final var connect = getOwner().getThreadConnectionsWrapper().getCurrentThreadConnection()) {
+                if (getSaveStatement() == null || !getSaveStatement().getConnection().isEqual(connect)) {
+                    if (getSaveStatement() != null) {
+                        final var connection = getSaveStatement().getConnection();
+                        if (connection != null) {
+                            connection.close();
+                        }
                     }
+                    this.saveStatement = vSaveOperator.prepareStatement(getSaveCommand(), accumulateMode);
                 }
-                this.saveStatement = vSaveOperator.prepareStatement(getSaveCommand(), accumulateMode);
-            }
 
-            if (isUseTransactionDueSave()) {
-                connect.openTransaction();
-            }
-            try {
-                try {
-                    switch (accumulateMode) {
-                        case PerMessage, ListOfMessages -> vSaveOperator.saveData(getSaveStatement(), getMessages(), accumulateMode);
-                        case PerObject, ListOfObjects -> vSaveOperator.saveData(getSaveStatement(), getObjects(), accumulateMode);
-                        case PerPackage, ListOfPackages -> vSaveOperator.saveData(getSaveStatement(), getPackages(), accumulateMode);
-                        default -> throw new IllegalStateException("Unexpected value: " + accumulateMode);
-                    }
-
-                    final var event = getEventAfterSave();
-                    if (event != null) {
-                        getOwner().getEventPublisher().publishEvent(event);
-                    }
-                    if (isUseTransactionDueSave()) {
-                        connect.commitTransaction();
-                    }
-
-                } finally {
-                    resetBuffer();
-                }
-            } catch (Exception e) {
-                log.error("", e);
                 if (isUseTransactionDueSave()) {
-                    connect.rollbackTransaction();
-                    throw e;
+                    connect.openTransaction();
+                }
+                try {
+                    try {
+                        switch (accumulateMode) {
+                            case PerMessage, ListOfMessages -> vSaveOperator.saveData(getSaveStatement(), getMessages(), accumulateMode);
+                            case PerObject, ListOfObjects -> vSaveOperator.saveData(getSaveStatement(), getObjects(), accumulateMode);
+                            case PerPackage, ListOfPackages -> vSaveOperator.saveData(getSaveStatement(), getPackages(), accumulateMode);
+                            default -> throw new IllegalStateException("Unexpected value: " + accumulateMode);
+                        }
+
+                        final var event = getEventAfterSave();
+                        if (event != null) {
+                            getOwner().getEventPublisher().publishEvent(event);
+                        }
+                        if (isUseTransactionDueSave()) {
+                            connect.commitTransaction();
+                        }
+
+                    } finally {
+                        resetBuffer();
+                    }
+                } catch (Exception e) {
+                    log.error("", e);
+                    if (isUseTransactionDueSave()) {
+                        connect.rollbackTransaction();
+                        throw e;
+                    }
                 }
             }
         }
