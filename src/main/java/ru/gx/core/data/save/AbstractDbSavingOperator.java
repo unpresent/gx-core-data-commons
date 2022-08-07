@@ -68,9 +68,11 @@ public abstract class AbstractDbSavingOperator
         switch (accumulateMode) {
             case PerMessage -> internalSavePerMessage(statement, data);
             case PerObject -> internalSavePerObject(statement, data);
+            case PerRawObject -> internalSavePerRawObject(statement, data);
             case PerPackage -> internalSavePerPackage(statement, data);
             case ListOfMessages -> internalSaveListOfMessages(statement, data);
             case ListOfObjects -> internalSaveListOfObjects(statement, data);
+            case ListOfRawObjects -> internalSaveListOfRawObjects(statement, data);
             case ListOfPackages -> internalSaveListOfPackages(statement, data);
             default -> throw new UnsupportedDataTypeException("Unsupported accumulateMode = " + accumulateMode);
         }
@@ -119,6 +121,19 @@ public abstract class AbstractDbSavingOperator
             }
         } else {
             throw new UnsupportedDataTypeException("Unsupported class for parameter data. Class = " + data.getClass().getName());
+        }
+    }
+
+    protected void internalSavePerRawObject(
+            @NotNull final SqlCommandWrapper statement,
+            @NotNull final Object data
+    ) throws SQLException, JsonProcessingException {
+        if (data instanceof final Iterable items) {
+            for (@NotNull final var item : items) {
+                internalSavePreparedRawObject(statement, item);
+            }
+        } else {
+            internalSavePreparedRawObject(statement, data);
         }
     }
 
@@ -197,6 +212,18 @@ public abstract class AbstractDbSavingOperator
     }
 
     @SuppressWarnings("unchecked")
+    protected void internalSaveListOfRawObjects(
+            @NotNull final SqlCommandWrapper statement,
+            @NotNull final Object data
+    ) throws SQLException, JsonProcessingException, UnsupportedDataTypeException {
+        if (data instanceof final Iterable items) {
+            internalSavePreparedRawObjects(statement, items);
+        } else {
+            throw new UnsupportedDataTypeException("Unsupported class for parameter data. Class = " + data.getClass().getName());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     protected void internalSaveListOfPackages(
             @NotNull final SqlCommandWrapper statement,
             @NotNull final Object data
@@ -230,9 +257,19 @@ public abstract class AbstractDbSavingOperator
             @NotNull final DataObject dataObject
     ) throws SQLException, JsonProcessingException;
 
+    protected abstract void internalSavePreparedRawObject(
+            @NotNull final SqlCommandWrapper statement,
+            @NotNull final Object rawObject
+    ) throws SQLException, JsonProcessingException;
+
     public abstract void internalSavePreparedDataObjects(
             @NotNull final SqlCommandWrapper statement,
             @NotNull Iterable<DataObject> dataObjects
+    ) throws SQLException, JsonProcessingException;
+
+    public abstract void internalSavePreparedRawObjects(
+            @NotNull final SqlCommandWrapper statement,
+            @NotNull Iterable<Object> rawObjects
     ) throws SQLException, JsonProcessingException;
 
     public abstract void internalSavePreparedDataPackage(

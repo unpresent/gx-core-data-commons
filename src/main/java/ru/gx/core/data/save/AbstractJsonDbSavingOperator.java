@@ -50,12 +50,39 @@ public abstract class AbstractJsonDbSavingOperator
     }
 
     @Override
+    protected void internalSavePreparedRawObject(
+            @NotNull final SqlCommandWrapper statement,
+            @NotNull final Object rawObject
+    ) throws SQLException {
+        executeStatement(statement, rawObject);
+    }
+
+    @Override
     public void internalSavePreparedDataObjects(
             @NotNull final SqlCommandWrapper statement,
             @NotNull Iterable<DataObject> dataObjects
     ) throws SQLException, JsonProcessingException {
         final var data = getObjectMapper().writeValueAsString(dataObjects);
         executeStatement(statement, data);
+    }
+
+    @Override
+    public void internalSavePreparedRawObjects(
+            @NotNull final SqlCommandWrapper statement,
+            @NotNull Iterable<Object> rawObjects
+    ) throws SQLException {
+        final var data = new StringBuilder().append("[");
+        var isFirst = true;
+        for (final var item: rawObjects) {
+            if (!isFirst) {
+                data.append(',');
+            } else {
+                isFirst = false;
+            }
+            data.append(item);
+        }
+        data.append(']');
+        executeStatement(statement, data.toString());
     }
 
     @Override

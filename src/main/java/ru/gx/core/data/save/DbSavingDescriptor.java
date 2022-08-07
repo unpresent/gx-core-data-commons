@@ -102,9 +102,11 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
      * <ul>
      *      <li>{@link DbSavingAccumulateMode#PerMessage}</li>
      *      <li>{@link DbSavingAccumulateMode#PerObject}</li>
+     *      <li>{@link DbSavingAccumulateMode#PerRawObject}</li>
      *      <li>{@link DbSavingAccumulateMode#PerPackage}</li>
      *      <li>{@link DbSavingAccumulateMode#ListOfMessages}</li>
      *      <li>{@link DbSavingAccumulateMode#ListOfObjects}</li>
+     *      <li>{@link DbSavingAccumulateMode#ListOfRawObjects}</li>
      *      <li>{@link DbSavingAccumulateMode#ListOfPackages}</li>
      * </ul>
      */
@@ -119,7 +121,7 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
     private int bufferLimit = DbSavingDescriptorsDefaults.DEFAULTS_BUFFER_LIMIT;
 
     @Getter
-    private int allowableBufferOversize = (int)(DbSavingDescriptorsDefaults.DEFAULTS_BUFFER_LIMIT * 0.1) + 1;
+    private int allowableBufferOversize = (int) (DbSavingDescriptorsDefaults.DEFAULTS_BUFFER_LIMIT * 0.1) + 1;
 
     /**
      * Максимальное время (в мс), в течение которого требуется копить данные, после этого данные будут сохранены в БД.
@@ -159,6 +161,12 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
      */
     @Getter(PROTECTED)
     private final List<DataPackage<? extends DataObject>> packages = new ArrayList<>();
+
+    /**
+     * Буфер RAW-данных
+     */
+    @Getter(PROTECTED)
+    private final List<Object> rawObjects = new ArrayList<>();
 
     /**
      * Момент последнего сохранения в БД данных =System.currentTimeMillis() сразу после сохранения.
@@ -281,10 +289,9 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
     // -----------------------------------------------------------------------------------------------------------------
     // <editor-fold desc="Additional getters & setters">
     @NotNull
-    public DbSavingDescriptor setBufferLimit(final int value)
-    {
+    public DbSavingDescriptor setBufferLimit(final int value) {
         this.bufferLimit = value;
-        this.allowableBufferOversize = (int)(DbSavingDescriptorsDefaults.DEFAULTS_BUFFER_LIMIT * 0.1) + 1;
+        this.allowableBufferOversize = (int) (DbSavingDescriptorsDefaults.DEFAULTS_BUFFER_LIMIT * 0.1) + 1;
         return this;
     }
 
@@ -460,6 +467,7 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
         return switch (getAccumulateMode()) {
             case PerMessage, ListOfMessages -> getMessages();
             case PerObject, ListOfObjects -> getObjects();
+            case PerRawObject, ListOfRawObjects -> getRawObjects();
             case PerPackage, ListOfPackages -> getPackages();
         };
     }
@@ -513,11 +521,28 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
                 if (data instanceof final DataObject dataObject) {
                     getObjects().add(dataObject);
                 } else if (data instanceof final DataPackage<?> dataPackage) {
-                    getPackages().add(dataPackage);
+                    getObjects().addAll(dataPackage.getObjects());
                 } else {
                     throw new UnsupportedOperationException("Unsupported accumulateMode "
                             + getAccumulateMode()
                             + " for body data " + data.getClass().getName());
+                }
+            }
+            case PerRawObject, ListOfRawObjects -> {
+                if (getRawObjects().isEmpty()) {
+                    resetBuffer();
+                } else {
+                    checkBufferIsFull();
+                }
+                final var data = internalExtractData(message);
+                if (data instanceof final DataObject dataObject) {
+                    getRawObjects().add(dataObject);
+                } else if (data instanceof final DataPackage<?> dataPackage) {
+                    dataPackage.getObjects().forEach(object -> getObjects().add(object));
+                } else if (data instanceof final Collection<?> collection) {
+                    getRawObjects().addAll(collection);
+                } else {
+                    getRawObjects().add(data);
                 }
             }
             case PerPackage, ListOfPackages -> {
@@ -591,6 +616,14 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
                 }
                 getObjects().add(dataObject);
             }
+            case PerRawObject, ListOfRawObjects -> {
+                if (getRawObjects().isEmpty()) {
+                    resetBuffer();
+                } else {
+                    checkBufferIsFull();
+                }
+                getRawObjects().add(dataObject);
+            }
             case PerPackage, ListOfPackages -> {
                 if (getPackages().isEmpty()) {
                     resetBuffer();
@@ -605,6 +638,31 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
                 objects.add(dataObject);
             }
             default -> throw new UnsupportedOperationException("Unknown accumulateMode " + getAccumulateMode());
+        }
+        this.eventAfterSave = eventAfterSave;
+        checkNeedToSave();
+    }
+
+    /**
+     * Добавить в буфер/сохранить немедленно объект данных
+     *
+     * @param rawObject      объект RAW-данных
+     * @param eventAfterSave событие, которое будет вызываться через Spring Events после сохранения данных.
+     */
+    public void processRawObject(
+            @NotNull final Object rawObject,
+            @Nullable final ApplicationEvent eventAfterSave
+    ) throws SQLException, IOException {
+        switch (getAccumulateMode()) {
+            case PerRawObject, ListOfRawObjects -> {
+                if (getRawObjects().isEmpty()) {
+                    resetBuffer();
+                } else {
+                    checkBufferIsFull();
+                }
+                getRawObjects().add(rawObject);
+            }
+            default -> throw new UnsupportedOperationException("Unsupported accumulateMode " + getAccumulateMode());
         }
         this.eventAfterSave = eventAfterSave;
         checkNeedToSave();
@@ -634,9 +692,15 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
                 } else {
                     checkBufferIsFull();
                 }
-                dataPackage
-                        .getObjects()
-                        .forEach(o -> getObjects().add(o));
+                getObjects().addAll(dataPackage.getObjects());
+            }
+            case PerRawObject, ListOfRawObjects -> {
+                if (getRawObjects().isEmpty()) {
+                    resetBuffer();
+                } else {
+                    checkBufferIsFull();
+                }
+                getRawObjects().addAll(dataPackage.getObjects());
             }
             case PerPackage, ListOfPackages -> {
                 if (getPackages().isEmpty()) {
@@ -674,6 +738,7 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
     public void resetBuffer() {
         getMessages().clear();
         getObjects().clear();
+        getRawObjects().clear();
         getPackages().clear();
         this.lastSavedTimeMillis = System.currentTimeMillis();
     }
@@ -771,6 +836,7 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
                         switch (accumulateMode) {
                             case PerMessage, ListOfMessages -> vSaveOperator.saveData(getSaveStatement(), getMessages(), accumulateMode);
                             case PerObject, ListOfObjects -> vSaveOperator.saveData(getSaveStatement(), getObjects(), accumulateMode);
+                            case PerRawObject, ListOfRawObjects -> vSaveOperator.saveData(getSaveStatement(), getRawObjects(), accumulateMode);
                             case PerPackage, ListOfPackages -> vSaveOperator.saveData(getSaveStatement(), getPackages(), accumulateMode);
                             default -> throw new IllegalStateException("Unexpected value: " + accumulateMode);
                         }

@@ -50,12 +50,28 @@ public abstract class AbstractBinaryDbSavingOperator
     }
 
     @Override
+    public void internalSavePreparedRawObject(
+            @NotNull final SqlCommandWrapper statement,
+            @NotNull final Object rawObject
+    ) throws SQLException {
+        executeStatement(statement, rawObject);
+    }
+
+    @Override
     public void internalSavePreparedDataObjects(
             @NotNull final SqlCommandWrapper statement,
             @NotNull Iterable<DataObject> dataObjects
     ) throws SQLException, JsonProcessingException {
         final var data = getObjectMapper().writeValueAsBytes(dataObjects);
         executeStatement(statement, data);
+    }
+
+    @Override
+    public void internalSavePreparedRawObjects(
+            @NotNull final SqlCommandWrapper statement,
+            @NotNull Iterable<Object> rawObjects
+    ) throws SQLException {
+        executeStatement(statement, rawObjects);
     }
 
     @Override
