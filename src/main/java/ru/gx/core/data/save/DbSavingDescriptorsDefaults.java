@@ -30,6 +30,11 @@ public class DbSavingDescriptorsDefaults extends OutcomeChannelDescriptorsDefaul
     public static final int DEFAULTS_BUFFER_FOR_MS = 500;
 
     /**
+     * Пауза перед повтором попытки сохранения после ошибки по умолчанию.
+     */
+    public static final int DEFAULTS_RETRY_AFTER_ERROR_FOR_MS = 15000;
+
+    /**
      * Режим обработки данных (допускается или нет буферизация) по умолчанию.
      */
     public static final DbSavingProcessMode DEFAULT_PROCESS_MODE = DbSavingProcessMode.UseBuffer;
@@ -76,6 +81,11 @@ public class DbSavingDescriptorsDefaults extends OutcomeChannelDescriptorsDefaul
      * Время накопления (в течение которого данные накапливаются в буфере перед сохранением).
      */
     private int bufferForMs = DEFAULTS_BUFFER_FOR_MS;
+
+    /**
+     * Пауза перед повтором попытки сохранения после ошибки по умолчанию.
+     */
+    private int retryAfterErrorForMs = DEFAULTS_RETRY_AFTER_ERROR_FOR_MS;
 
     /**
      * Реализация метода сохранения в БД

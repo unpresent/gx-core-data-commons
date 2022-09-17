@@ -131,6 +131,13 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
     private int bufferForMs = DbSavingDescriptorsDefaults.DEFAULTS_BUFFER_FOR_MS;
 
     /**
+     * Пауза перед повтором попытки сохранения после ошибки по умолчанию.
+     */
+    @Getter
+    @Setter
+    private int retryAfterErrorForMs = DbSavingDescriptorsDefaults.DEFAULTS_RETRY_AFTER_ERROR_FOR_MS;
+
+    /**
      * Реализация метода сохранения в БД
      */
     @Getter(PROTECTED)
@@ -169,10 +176,16 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
     private final List<Object> rawObjects = new ArrayList<>();
 
     /**
-     * Момент последнего сохранения в БД данных =System.currentTimeMillis() сразу после сохранения.
+     * Момент последнего сохранения в БД. =System.currentTimeMillis() сразу после сохранения.
      */
     @Getter(PROTECTED)
     private long lastSavedTimeMillis;
+
+    /**
+     * Момент последней ошибки при сохранении в БД. =System.currentTimeMillis() сразу после сохранения с ошибкой.
+     */
+    @Getter(PROTECTED)
+    private Long lastErrorTimeMillis;
 
     @Getter(PROTECTED)
     @Nullable
@@ -480,6 +493,10 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
             return true;
         }
 
+        if (getLastErrorIntervalMs() < getRetryAfterErrorForMs()) {
+            return false;
+        }
+
         final var buffer = getBuffer();
         return buffer.size() >= getBufferLimit()
                 || (getBufferForMs() > 0 && getLastSavedIntervalMs() > getBufferForMs() && !buffer.isEmpty());
@@ -490,6 +507,15 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
      */
     public long getLastSavedIntervalMs() {
         return System.currentTimeMillis() - this.lastSavedTimeMillis;
+    }
+
+    /**
+     * @return Сколько миллисекунд прошло последнего сохранения в БД данных (= System.currentTimeMillis() - lastSavedTimeMillis).
+     */
+    public long getLastErrorIntervalMs() {
+        return lastErrorTimeMillis == null ?
+                getRetryAfterErrorForMs() + 1 :
+                System.currentTimeMillis() - this.lastErrorTimeMillis;
     }
 
     /**
@@ -832,27 +858,25 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
                     connect.openTransaction();
                 }
                 try {
-                    try {
-                        switch (accumulateMode) {
-                            case PerMessage, ListOfMessages -> vSaveOperator.saveData(getSaveStatement(), getMessages(), accumulateMode);
-                            case PerObject, ListOfObjects -> vSaveOperator.saveData(getSaveStatement(), getObjects(), accumulateMode);
-                            case PerRawObject, ListOfRawObjects -> vSaveOperator.saveData(getSaveStatement(), getRawObjects(), accumulateMode);
-                            case PerPackage, ListOfPackages -> vSaveOperator.saveData(getSaveStatement(), getPackages(), accumulateMode);
-                            default -> throw new IllegalStateException("Unexpected value: " + accumulateMode);
-                        }
-
-                        final var event = getEventAfterSave();
-                        if (event != null) {
-                            getOwner().getEventPublisher().publishEvent(event);
-                        }
-                        if (isUseTransactionDueSave()) {
-                            connect.commitTransaction();
-                        }
-
-                    } finally {
-                        resetBuffer();
+                    switch (accumulateMode) {
+                        case PerMessage, ListOfMessages -> vSaveOperator.saveData(getSaveStatement(), getMessages(), accumulateMode);
+                        case PerObject, ListOfObjects -> vSaveOperator.saveData(getSaveStatement(), getObjects(), accumulateMode);
+                        case PerRawObject, ListOfRawObjects -> vSaveOperator.saveData(getSaveStatement(), getRawObjects(), accumulateMode);
+                        case PerPackage, ListOfPackages -> vSaveOperator.saveData(getSaveStatement(), getPackages(), accumulateMode);
+                        default -> throw new IllegalStateException("Unexpected value: " + accumulateMode);
                     }
+
+                    final var event = getEventAfterSave();
+                    if (event != null) {
+                        getOwner().getEventPublisher().publishEvent(event);
+                    }
+                    if (isUseTransactionDueSave()) {
+                        connect.commitTransaction();
+                    }
+
+                    resetBuffer();
                 } catch (Exception e) {
+                    this.lastErrorTimeMillis = System.currentTimeMillis();
                     log.error("", e);
                     if (isUseTransactionDueSave()) {
                         connect.rollbackTransaction();
