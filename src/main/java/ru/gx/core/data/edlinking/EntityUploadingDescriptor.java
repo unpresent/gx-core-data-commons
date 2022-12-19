@@ -2,7 +2,7 @@ package ru.gx.core.data.edlinking;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import ru.gx.core.channels.ChannelApiDescriptor;
 import ru.gx.core.data.DataObject;
 import ru.gx.core.data.DataObjectKeyExtractor;
@@ -11,7 +11,6 @@ import ru.gx.core.data.entity.EntitiesPackage;
 import ru.gx.core.data.entity.EntityObject;
 import ru.gx.core.messaging.Message;
 import ru.gx.core.messaging.MessageBody;
-import ru.gx.core.messaging.MessageHeader;
 
 @SuppressWarnings("unused")
 public interface EntityUploadingDescriptor
@@ -40,10 +39,10 @@ public interface EntityUploadingDescriptor
     EntityUploadingDescriptor<CH, E, O> setDtoPackageClass(@Nullable final Class<? extends DataPackage<O>> dtoPackageClass);
 
     @Nullable
-    CrudRepository<E, ?> getRepository();
+    PagingAndSortingRepository<E, ?> getRepository();
 
     @NotNull
-    EntityUploadingDescriptor<CH, E, O> setRepository(@NotNull final CrudRepository<E, ?> repository);
+    EntityUploadingDescriptor<CH, E, O> setRepository(@NotNull final PagingAndSortingRepository<E, ?> repository);
 
     @Nullable
     DtoFromEntityConverter<O, E> getDtoFromEntityConverter();

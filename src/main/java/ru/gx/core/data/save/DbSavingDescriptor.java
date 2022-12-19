@@ -493,13 +493,23 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
             return true;
         }
 
-        if (getLastErrorIntervalMs() < getRetryAfterErrorForMs()) {
+        final var buffer = getBuffer();
+        if (buffer.isEmpty() || getBufferForMs() <= 0) {
+            return false;
+        }
+        if (getLastSavedIntervalMs() < getBufferForMs() && buffer.size() < getBufferLimit()) {
             return false;
         }
 
-        final var buffer = getBuffer();
-        return buffer.size() >= getBufferLimit()
-                || (getBufferForMs() > 0 && getLastSavedIntervalMs() > getBufferForMs() && !buffer.isEmpty());
+        final var lastErrorIntervalMs = getLastErrorIntervalMs();
+        if (lastErrorIntervalMs >= 0) {
+            if (lastErrorIntervalMs < getRetryAfterErrorForMs()) {
+                return false;
+            }
+            log.info("Retrying save after error!");
+        }
+
+        return true;
     }
 
     /**
@@ -513,8 +523,8 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
      * @return Сколько миллисекунд прошло последнего сохранения в БД данных (= System.currentTimeMillis() - lastSavedTimeMillis).
      */
     public long getLastErrorIntervalMs() {
-        return lastErrorTimeMillis == null ?
-                getRetryAfterErrorForMs() + 1 :
+        return this.lastErrorTimeMillis == null ?
+                -1 :
                 System.currentTimeMillis() - this.lastErrorTimeMillis;
     }
 
@@ -754,7 +764,7 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
         if (bufferSize <= getBufferLimit()) {
             return;
         }
-        if (bufferSize + getAllowableBufferOversize() > getBufferLimit()) {
+        if (bufferSize > getBufferLimit() + getAllowableBufferOversize()) {
             throw new BufferIsFullException(
                     "DbSavingDescriptor (" + getChannelName()
                             + ") Buffer is full (size = " + bufferSize + "; limit = " + getBufferLimit() + ")");
@@ -842,6 +852,7 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
         synchronized (getOwner()) {
             final var vSaveOperator = getSaveOperator();
             final var accumulateMode = getAccumulateMode();
+            final var started = System.currentTimeMillis();
 
             try (final var connect = getOwner().getThreadConnectionsWrapper().getCurrentThreadConnection()) {
                 if (getSaveStatement() == null || !getSaveStatement().getConnection().isEqual(connect)) {
@@ -874,9 +885,15 @@ public class DbSavingDescriptor extends AbstractOutcomeChannelHandlerDescriptor 
                         connect.commitTransaction();
                     }
 
+                    recordMessagesExecuted(
+                            getOwner().getConfigurationName(),
+                            System.currentTimeMillis() - started,
+                            getBuffer().size()
+                    );
                     resetBuffer();
                 } catch (Exception e) {
                     this.lastErrorTimeMillis = System.currentTimeMillis();
+                    log.info(String.format("Error has been caught! Set lastErrorTimeMillis = %d", this.lastErrorTimeMillis));
                     log.error("", e);
                     if (isUseTransactionDueSave()) {
                         connect.rollbackTransaction();

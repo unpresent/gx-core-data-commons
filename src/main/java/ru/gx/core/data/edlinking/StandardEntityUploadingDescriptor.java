@@ -7,7 +7,7 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import ru.gx.core.channels.ChannelApiDescriptor;
 import ru.gx.core.data.DataObject;
 import ru.gx.core.data.DataObjectKeyExtractor;
@@ -16,7 +16,6 @@ import ru.gx.core.data.entity.EntitiesPackage;
 import ru.gx.core.data.entity.EntityObject;
 import ru.gx.core.messaging.Message;
 import ru.gx.core.messaging.MessageBody;
-import ru.gx.core.messaging.MessageHeader;
 
 @Getter
 @Accessors(chain = true)
@@ -46,7 +45,7 @@ public class StandardEntityUploadingDescriptor
 
     @Setter
     @Nullable
-    private CrudRepository<E, ?> repository;
+    private PagingAndSortingRepository<E, ?> repository;
 
     @Setter
     @Nullable

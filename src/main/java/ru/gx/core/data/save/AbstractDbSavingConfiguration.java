@@ -1,5 +1,6 @@
 package ru.gx.core.data.save;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationEventPublisher;
@@ -28,9 +29,10 @@ public abstract class AbstractDbSavingConfiguration
     protected AbstractDbSavingConfiguration(
             @NotNull final String configurationName,
             @NotNull final ApplicationEventPublisher eventPublisher,
-            @NotNull final ThreadConnectionsWrapper threadConnectionsWrapper
+            @NotNull final ThreadConnectionsWrapper threadConnectionsWrapper,
+            @NotNull final MeterRegistry meterRegistry
     ) {
-        super(ChannelDirection.Out, configurationName);
+        super(ChannelDirection.Out, configurationName, meterRegistry);
         this.eventPublisher = eventPublisher;
         this.threadConnectionsWrapper = threadConnectionsWrapper;
     }
